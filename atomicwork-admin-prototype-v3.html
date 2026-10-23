@@ -1,0 +1,1196 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Atomicwork Admin Setup: clickable prototype</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400..800&display=swap">
+<style>
+:root{
+  --bg:#F6F4EE;--card:#FCFBF8;--card2:#ECEAE2;--line:#DAD6CA;--line2:#C4BFB0;
+  --ink:#121B33;--muted:#4A5568;--accent:#3643C9;--accent-t:#E3E6FA;--accent-ink:#2A369E;--on-accent:#F6F4EE;
+  --amber:#F2A93B;--amber-t:#FBEBCB;--amber-ink:#6B4200;--ok-t:#DCEFE5;--ok-ink:#14583F;--bad-t:#F3DDD6;--bad-ink:#7A2E1D;
+  --shadow:0 18px 50px rgba(18,27,51,.12);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1426;--card:#161E36;--card2:#1D2745;--line:#2C3759;--line2:#3B4770;
+    --ink:#EEF0F7;--muted:#AAB3CC;--accent:#8392FF;--accent-t:#232C57;--accent-ink:#BCC5FF;--on-accent:#0E1426;
+    --amber:#F2A93B;--amber-t:#3A2D12;--amber-ink:#F6CF8A;--ok-t:#143427;--ok-ink:#8FDDB8;--bad-t:#3A1F19;--bad-ink:#F2B4A4;
+    --shadow:0 18px 50px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1426;--card:#161E36;--card2:#1D2745;--line:#2C3759;--line2:#3B4770;
+  --ink:#EEF0F7;--muted:#AAB3CC;--accent:#8392FF;--accent-t:#232C57;--accent-ink:#BCC5FF;--on-accent:#0E1426;
+  --amber:#F2A93B;--amber-t:#3A2D12;--amber-ink:#F6CF8A;--ok-t:#143427;--ok-ink:#8FDDB8;--bad-t:#3A1F19;--bad-ink:#F2B4A4;
+  --shadow:0 18px 50px rgba(0,0,0,.45);
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 'DM Sans',system-ui,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--card);z-index:70}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+h1,h2,h3,p{margin:0}
+.ic{width:1.15em;height:1.15em;flex:none;vertical-align:-.2em}
+
+/* top bar + shell */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:60;display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--card);border-bottom:1px solid var(--line)}
+.brand{font-weight:800;font-size:19px;letter-spacing:-.3px;color:var(--accent);background:none;border:0;padding:0}
+.sp{flex:1}
+.shell{display:grid;grid-template-columns:240px minmax(0,1fr);align-items:start;max-width:1400px;margin:0 auto}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 62px);max-height:calc(100vh - 62px);overflow:auto;padding:18px 12px 28px 20px;display:flex;flex-direction:column;gap:2px}
+.sgrp{font-size:13px;font-weight:700;color:var(--muted);padding:16px 12px 6px}
+.divider{height:1px;background:var(--line);margin:12px 12px 6px}
+.nav{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:transparent;padding:9px 12px;border-radius:12px;font-weight:500}
+.nav.sub{padding-left:24px}
+.nav:hover{background:var(--card2)}
+.nav.on{background:var(--accent-t);color:var(--accent-ink);font-weight:700}
+.dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--line2);flex:none;margin-left:auto}
+.dot.done{background:var(--ok-ink);border-color:var(--ok-ink)}
+.dot.prog{background:var(--amber);border-color:var(--amber)}
+main{padding:26px 32px 80px;min-width:0}
+.wrap{max-width:1040px;margin:0 auto}
+
+/* workspace dropdown, drawer */
+.wsm{position:relative}
+.caret{display:inline-block;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid currentColor;margin-left:6px;vertical-align:middle}
+.menu{position:absolute;right:0;top:calc(100% + 8px);width:310px;background:var(--card);border:1px solid var(--line2);border-radius:16px;box-shadow:var(--shadow);padding:8px;z-index:65}
+.mi{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:transparent;border-radius:10px;padding:10px 12px;font-weight:500}
+.mi:hover{background:var(--card2)}
+.mi.on{background:var(--accent-t);color:var(--accent-ink);font-weight:700}
+.mfoot{padding:10px 12px 4px;color:var(--muted);font-size:14px;border-top:1px solid var(--line);margin-top:6px}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:min(380px,100vw);background:var(--card);border-left:1px solid var(--line2);box-shadow:var(--shadow);z-index:80;padding:calc(env(safe-area-inset-top,0px) + 20px) 20px 20px;overflow:auto}
+.lg{padding:10px 0;border-bottom:1px solid var(--line)}
+
+/* primitives */
+.btn{border:0;background:var(--accent);color:var(--on-accent);font-weight:700;padding:11px 20px;border-radius:12px;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{filter:brightness(1.08)}
+.btn.sec{background:transparent;color:var(--ink);border:1px solid var(--line2)}
+.btn.sec:hover{background:var(--card2)}
+.btn.amber{background:var(--amber);color:#121B33}
+.btn.sm{padding:6px 14px;font-size:15px;border-radius:10px}
+.btn[disabled]{background:var(--card2);color:var(--muted);cursor:not-allowed;filter:none;border:1px solid var(--line)}
+.link{background:none;border:0;color:var(--accent);font-weight:700;text-decoration:underline;padding:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px}
+.card.tint{background:var(--accent-t);border-color:transparent}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 12px;border-radius:40px;font-weight:700;font-size:14px;background:var(--card2);color:var(--muted);white-space:nowrap}
+.pill.ok{background:var(--ok-t);color:var(--ok-ink)}
+.pill.warn{background:var(--amber-t);color:var(--amber-ink)}
+.pill.bad{background:var(--bad-t);color:var(--bad-ink)}
+.pill.acc{background:var(--accent-t);color:var(--accent-ink)}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{border:1px solid var(--line2);background:var(--card);padding:8px 16px;border-radius:40px;font-weight:500}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.row{display:flex;align-items:center;gap:14px}
+.wrapr{flex-wrap:wrap}
+.stack{display:flex;flex-direction:column;gap:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.list{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.li{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.li:last-child{border-bottom:0}
+.li .t{font-weight:700}
+.tile{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;background:var(--accent-t);color:var(--accent-ink);font-weight:800;flex:none}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;display:inline-block;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.bar{height:10px;border-radius:6px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:6px;transition:width .4s}
+.hint{display:flex;gap:10px;align-items:flex-start;background:var(--amber-t);color:var(--amber-ink);border-radius:14px;padding:14px 16px}
+.hint.ok{background:var(--ok-t);color:var(--ok-ink)}
+.hint.bad{background:var(--bad-t);color:var(--bad-ink)}
+.hint.info{background:var(--accent-t);color:var(--accent-ink)}
+.hint .ic{margin-top:3px}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:12px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:7px 14px;font-weight:500;color:var(--muted)}
+.seg button.on{background:var(--accent);color:var(--on-accent);font-weight:700}
+input[type=text],input[type=email],select,textarea{width:100%;border:1px solid var(--line2);background:var(--card);border-radius:12px;padding:9px 14px}
+select.s{width:auto;padding:6px 10px;border-radius:10px}
+textarea{min-height:100px;resize:vertical}
+label.f{display:block;font-weight:700;margin-bottom:6px}
+.tg{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+details.help{margin-top:6px;color:var(--muted);font-size:14px}
+details.help summary{cursor:pointer;color:var(--accent);font-weight:700}
+details.help p{margin-top:6px;max-width:70ch}
+.cust{margin-top:14px;border-top:1px dashed var(--line2);padding-top:10px}
+.cust>summary{cursor:pointer;font-weight:700;color:var(--accent)}
+.err{display:flex;gap:10px;align-items:flex-start;background:var(--bad-t);color:var(--bad-ink);border-radius:12px;padding:10px 14px;margin-top:8px}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;font-size:14px;color:var(--muted);font-weight:700;padding:8px 14px;border-bottom:1px solid var(--line)}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+
+/* module header, strip, tabs */
+.mh{margin-bottom:14px}
+.mh .ph{color:var(--accent);font-weight:700;font-size:15px}
+.mh h1{font-size:38px;line-height:1.1;letter-spacing:-1px;margin:4px 0 8px}
+.mh .tl2{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.mh p{color:var(--muted);font-size:17px;max-width:66ch;margin-top:6px}
+.conn{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;font-size:14px;color:var(--muted)}
+.strip{background:var(--card);border:1px solid var(--line);border-radius:16px;margin:16px 0 8px}
+.strip>button{display:flex;align-items:center;gap:12px;width:100%;border:0;background:transparent;padding:12px 16px;text-align:left}
+.tk{display:flex;align-items:center;gap:12px;padding:9px 16px;border-top:1px solid var(--line);width:100%;background:transparent;border-left:0;border-right:0;border-bottom:0;text-align:left}
+.tk:hover{background:var(--card2)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:14px 0 22px;overflow-x:auto}
+.tabs button{border:0;background:transparent;padding:10px 16px;font-weight:500;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.on{color:var(--accent-ink);font-weight:700;border-bottom-color:var(--accent)}
+.foot{display:flex;gap:12px;align-items:center;margin-top:22px;flex-wrap:wrap}
+
+/* hub */
+.hero{display:grid;grid-template-columns:1fr 230px;gap:24px;align-items:center}
+.hero h2{font-size:44px;line-height:1.05;letter-spacing:-1.5px;margin-bottom:10px}
+.ringbox{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.ring{position:relative;width:140px;height:140px}
+.ring svg{width:140px;height:140px;transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:32px;letter-spacing:-1px}
+.next{display:flex;align-items:center;gap:18px;background:var(--accent);color:var(--on-accent);border-radius:18px;padding:20px 24px;margin-top:18px}
+.next b{font-size:20px}
+.sec-h{font-size:22px;font-weight:700;margin:30px 0 12px;letter-spacing:-.3px}
+.map{display:flex;flex-direction:column;gap:10px;align-items:stretch}
+.mrow{display:grid;gap:10px}
+.mbox{border:1px solid var(--line2);background:var(--card);border-radius:14px;padding:12px 14px;text-align:left}
+.mbox:hover{border-color:var(--accent)}
+.mbox b{display:block}
+.mlab{font-size:13px;font-weight:700;color:var(--muted);text-align:center}
+.warr{text-align:center;color:var(--accent);font-weight:800;line-height:1}
+
+/* module-specific */
+.big{font-size:36px;font-weight:700;letter-spacing:-1px;line-height:1}
+.stile{display:flex;align-items:baseline;gap:10px;border-radius:16px;padding:16px 20px}
+.stile.ok{background:var(--ok-t);color:var(--ok-ink)}
+.stile.warn{background:var(--amber-t);color:var(--amber-ink)}
+.stile.bad{background:var(--bad-t);color:var(--bad-ink)}
+.stile.acc{background:var(--accent-t);color:var(--accent-ink)}
+.chat{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px}
+.msgs{display:flex;flex-direction:column;gap:10px;min-height:320px;max-height:440px;overflow:auto;padding:4px 2px}
+.b{max-width:80%;padding:10px 16px;border-radius:18px}
+.b.u{align-self:flex-end;background:var(--accent);color:var(--on-accent)}
+.b.a{align-self:flex-start;background:var(--card2)}
+.trace dt{color:var(--muted);font-size:14px;margin-top:12px}
+.trace dd{margin:0;font-weight:700}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap}
+.node{flex:1;min-width:110px;text-align:center;padding:14px 8px;border:1px solid var(--line2);background:var(--card);border-radius:14px;font-weight:700;transition:all .25s}
+.node.act{border-color:var(--accent);background:var(--accent-t);color:var(--accent-ink);transform:translateY(-3px)}
+.node.done{border-color:var(--ok-ink);background:var(--ok-t);color:var(--ok-ink)}
+.node.skip{border-style:dashed;color:var(--muted);background:transparent;text-decoration:line-through}
+.arr{align-self:center;color:var(--accent);font-weight:800}
+.tl{margin:0;padding:0;list-style:none}
+.tl li{display:flex;gap:12px;padding:7px 0}
+.tl .ic{margin-top:4px;color:var(--accent)}
+.wave{display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.wave:last-child{border-bottom:0}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bars .r{display:grid;grid-template-columns:110px 1fr 48px;gap:12px;align-items:center}
+.msg-teams{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:12px;padding:14px 18px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:14px;font-weight:700;opacity:0;pointer-events:none;transition:all .25s;z-index:90;max-width:90vw}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.demo{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border:1px dashed var(--line2);border-radius:16px;padding:14px 18px;margin-top:34px}
+.empty{text-align:center;padding:40px 24px}
+
+@media (max-width:980px){
+  .shell{grid-template-columns:1fr}
+  .side{position:static;max-height:none;flex-direction:row;overflow-x:auto;padding:10px 16px;gap:6px;border-bottom:1px solid var(--line)}
+  .sgrp,.divider{display:none}
+  .nav,.nav.sub{width:auto;white-space:nowrap;padding-left:12px}
+  .dot{margin-left:6px}
+  main{padding:22px 16px 80px}
+  .hero{grid-template-columns:1fr}
+  .grid2,.grid3,.chat{grid-template-columns:1fr}
+  .mh h1{font-size:30px}.hero h2{font-size:34px}
+  .top{padding:10px 14px;gap:8px}.rd{display:none}
+  .mrow{grid-template-columns:1fr!important}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]})};
+var KEY='aw-proto-v3';
+
+/* ---------- icons ---------- */
+var P={
+  check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  warn:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>',
+  bulb:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  moon:'<path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z"/>',
+  undo:'<path d="M9 7L4 12l5 5"/><path d="M4 12h10a6 6 0 0 1 0 12"/>'
+};
+function ico(n){return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+P[n]+'</svg>'}
+function pill(t,c){return '<span class="pill '+(c||'')+'">'+t+'</span>'}
+
+/* ---------- module map ---------- */
+var MODS=[
+ {id:'welcome',g:'',t:'Welcome and goals',scope:'org',tabs:['Setup plan','Your goals'],d:'Your goals shape the plan. This page is also your setup plan: every to-do, in one place.',uses:'',feeds:''},
+ {id:'identity',g:'Connections',t:'Identity',scope:'org',tabs:['Connect','People and roles','Test'],d:'Connect your identity provider. Atomicwork imports people, groups and managers.',uses:'Okta or Entra',feeds:'Atom, Workflows, Workspace members'},
+ {id:'knowledge',g:'Connections',t:'Knowledge',scope:'org',tabs:['Sources','Verified answers','Test'],d:'Connect the content Atom answers from, decide who can see each source, and see what Atom can answer today.',uses:'SharePoint, Confluence, Jira',feeds:'Atom'},
+ {id:'channels',g:'Connections',t:'Channels',scope:'org',tabs:['Connect','Test'],d:'Where employees reach Atom: Teams or Slack, email forwarding and the employee portal.',uses:'Microsoft Teams, Slack',feeds:'Atom'},
+ {id:'atom',g:'Configure',t:'Atom',scope:'org',tabs:['Settings','Skills','Try Atom','Test suite'],d:'Atom is the front door for employees. These settings are domain agnostic and apply to every workspace.',uses:'Identity, Knowledge, Channels',feeds:'Service management, Workflows, AI coworkers'},
+ {id:'workflows',g:'Configure',t:'Workflows',scope:'ws',tabs:['Workflows','Apps and access','Test'],d:'Approval paths and automations for this workspace, plus the access policy for each app.',uses:'Identity, Service management',feeds:'Atom, AI coworkers'},
+ {id:'coworker',g:'Configure',t:'AI coworkers',scope:'ws',tabs:['Coworkers','Test'],d:'Deploy specialists with a goal, tools and boundaries. They start supervised.',uses:'Identity, Workflows',feeds:'Atom'},
+ {id:'service',g:'Configure',t:'Service management',scope:'ws',tabs:['Request types','Teams and routing','Hours and SLAs','Service catalog','Test'],d:'Request types, agent groups, business hours, SLAs and the service catalog for this workspace.',uses:'Identity',feeds:'Atom, Workflows'},
+ {id:'wssettings',g:'',t:'Workspace settings',scope:'ws',tabs:['General','Members and roles'],d:'Name, who can raise requests, and who works in this workspace.',uses:'Identity',feeds:''},
+ {id:'golive',g:'',t:'Go-live readiness',scope:'ws',tabs:['Readiness','Test centre','Rollout','After go-live'],d:'Readiness is derived from your tests. Seven required checks, then a staged rollout.',uses:'Everything',feeds:''}
+];
+function mod(id){return MODS.filter(function(m){return m.id===id})[0]}
+var WSL=[['it','IT','IT','it'],['hr','HR','HR','hr'],['fin','Finance','FIN','fin'],['fac','Facilities','FAC','fac']];
+var ORDER=['identity','knowledge','channels','atom','service','workflows','coworker','golive'];
+var RES=['30 minutes','1 hour','2 hours','4 hours','8 hours','1 day','3 days','5 days'];
+var PAUSE=['Pending','Waiting for approval','Waiting on vendor'];
+var POLS=['Pre-approved','Manager','Manager + Security'];
+var AUD=['All employees','IT workspace only','HR workspace only','Org admins only'];
+var KSRC=[
+ {id:'sp-it',name:'SharePoint: IT guides',type:'SharePoint',n:214,aud:'All employees'},
+ {id:'cf-it',name:'Confluence: IT space',type:'Confluence',n:96,aud:'All employees',failOnce:true},
+ {id:'sp-hr',name:'SharePoint: HR policies',type:'SharePoint',n:58,aud:'All employees',hr:true},
+ {id:'jira',name:'Jira: projects',type:'Jira',n:41,aud:'IT workspace only'}
+];
+var TPL={
+ sf:{t:'How to request Salesforce access',b:'1. Open the Atom chat in Teams and say “I need Salesforce access”.\n2. Pick your role: Sales user or Admin.\n3. Your manager approves, then Security approves.\n4. You get a Teams message when access is ready, usually within a day.'},
+ laptop:{t:'How to get a new laptop',b:'1. Check the laptop policy for your eligibility date.\n2. Ask Atom for “a new laptop” and choose standard or developer.\n3. Your manager approves.\n4. IT ships the device and updates your ticket.'},
+ room:{t:'How to book a meeting room',b:'1. Open the Facilities calendar in Microsoft 365.\n2. Pick the floor and room size.\n3. Add the room as a resource on your invite.'}
+};
+var USERS=[['Priya Nair','Engineering, Pune','Dev Rao','Engineering, All employees'],['Marco Rossi','Sales, Milan','Elena Conti','Sales, EMEA'],['Aisha Khan','Finance, Dubai','Omar Syed','Finance, Approvers']];
+var SKILLS=[['pw','Okta password reset','Resets a password after verifying the employee.','okta'],['prov','Provision apps (Okta)','Grants app access once policy and approvals are met.','okta'],['intune','Remote install apps (Intune)','Pushes approved apps to managed devices.','intune']];
+var TEAMKIND={hr:['HR','Leave request','Benefits question','Employment letter'],fin:['Finance','Expense question','Invoice query','Vendor onboarding'],fac:['Facilities','Desk booking','Building access','Report a problem']};
+
+/* ---------- state ---------- */
+function mkSvc(list){return list.map(function(s,i){return {id:s[0],n:s[1],cat:s[2],fields:s[3],pub:false}})}
+function buildW(kind,name,key){
+ var it=kind==='it';
+ var w={
+  name:name,key:key,created:false,kind:kind,desc:it?'Handles employee requests, incidents and access.':'',vis:'All employees',pilot:null,
+  types:{sr:true,inc:true,prob:it,chg:it},typesOk:false,
+  groups:it?[{id:'g1',n:'Service desk',access:'Open',assign:'Round robin',agents:9,away:1,src:'Okta group IT-ServiceDesk'},{id:'g2',n:'Access',access:'Restricted',assign:'Round robin',agents:4,away:0,src:'Okta group IT-Identity'},{id:'g3',n:'Devices',access:'Open',assign:'Round robin',agents:6,away:0,src:'Okta group IT-EndUserComputing'}]:[{id:'g1',n:name+' Ops',access:'Open',assign:'Round robin',agents:5,away:0,src:'Okta group '+key+'-Ops'}],groupsOk:false,
+  hours:{tz:'Asia/Kolkata (IST)',days:'Mon–Fri',start:'09:00',end:'18:00',hol:'India 2026'},hoursOk:false,
+  slas:it?[{id:'s1',n:'P1 incident',type:'Incident',cond:'Priority = P1',resp:'1 hour',res:'4 hours',pause:['Pending']},{id:'s2',n:'P2 incident',type:'Incident',cond:'Priority = P2',resp:'4 hours',res:'1 day',pause:['Pending']},{id:'s3',n:'Service requests',type:'Service request',cond:'All service requests',resp:'1 day',res:'3 days',pause:['Pending','Waiting for approval']}]:[{id:'s1',n:'Incidents',type:'Incident',cond:'All incidents',resp:'4 hours',res:'1 day',pause:['Pending']},{id:'s3',n:'Service requests',type:'Service request',cond:'All service requests',resp:'1 day',res:'3 days',pause:['Pending','Waiting for approval']}],slasOk:false,
+  svc:it?mkSvc([['sw','Software access','Access',5],['laptop','New laptop','Hardware',6],['pw','Password reset','Access',2],['vpn','VPN access','Network',3],['issue','Report an issue','General',4]]):mkSvc([['s1',(TEAMKIND[kind]||['',' Request 1'])[1],'General',4],['s2',(TEAMKIND[kind]||['','','Request 2'])[2],'General',3],['s3',(TEAMKIND[kind]||['','','','Request 3'])[3],'General',3]]),
+  csat:false,
+  wf:{main:{name:it?'Software access approval':(name+' request approval'),svc:it?'sw':'s1',approver:'Reporting manager',notifyDecline:true,remind:false,prov:'Okta group assignment',status:'Draft'},p1:{status:'Draft'},extra:[],ai:''},
+  apps:it?[{n:'Salesforce',risk:'High',owner:'Sales Ops',pol:'Manager',prov:'Okta'},{n:'AWS Console',risk:'High',owner:'Cloud Platform',pol:'Manager',prov:'Okta'},{n:'NetSuite',risk:'High',owner:'Finance Systems',pol:'Manager',prov:'Manual'},{n:'Jira',risk:'Medium',owner:'Engineering Ops',pol:'Manager',prov:'Okta'},{n:'Figma',risk:'Low',owner:'Design Ops',pol:'Manager',prov:'Okta'},{n:'Slack',risk:'Low',owner:'IT',pol:'Pre-approved',prov:'Okta'},{n:'Zoom',risk:'Low',owner:'IT',pol:'Pre-approved',prov:'Okta'},{n:'Notion',risk:'Low',owner:'IT',pol:'Manager',prov:'Okta'}]:[],appsOk:false,
+  cw:{roster:it?[{id:'triage',n:'IT Support Triage',kind:'Triage',on:false,note:'Default for the workspace. Reads new requests and assigns the right specialist.'},{id:'access',n:'Access Management specialist',kind:'Specialist',on:false,note:'Fulfils access requests in connected apps.'},{id:'hw',n:'Hardware specialist',kind:'Specialist',on:false,note:'Device diagnostics and safe identity operations.'}]:[{id:'triage',n:name+' Triage',kind:'Triage',on:false,note:'Reads new requests and routes them to the right person.'}],
+   tools:{okta_read:true,okta_reset:true,okta_assign:true,okta_deactivate:false,atom_pub:true,atom_priv:true,atom_status:true,atom_reassign:true},
+   goal:{verify:true,humanDestructive:true,adminEscalate:true,end:'Resolved',note:false},mode:'Supervised',budget:'$150 per month',sel:'access',run:null,approved:false,tested:false},
+  R:{},run:{},sm:{ticket:0,ran:false,sim:null,simRun:false,app:'Figma'},
+  rollout:{started:false,waves:['locked','locked','locked']},kit:false,esc:false,after:{fixed:{},added:{}},visited:{}
+ };
+ return w;
+}
+function fresh(){
+ var w={};WSL.forEach(function(x){w[x[0]]=buildW(x[0]==='it'?'it':x[0],x[1],x[2])});w.it.created=true;
+ return{mod:'welcome',step:1,plan:false,cur:'it',menu:false,drawer:false,ver:0,log:[],visited:{},strip:{},err:{},resume:null,
+ ans:{pains:['Access requests','Device issues'],first:'IT'},
+ id:{okta:false,busy:false,sync:'Every hour',deprov:true,admins:['Sam Patel (you)'],analysts:[],mapOk:false,fallback:'',email:'',lookup:0},
+ kn:{src:[],verified:[{q:'How do I connect to the VPN?',a:'Install GlobalProtect from Software Center, then sign in with SSO.'}],fixed:{laptop:false,sf:false,room:false},edit:null,body:'',vq:'',va:''},
+ ch:{teams:false,slack:false,busy:{},consent:'none',consentOk:false,email:'',mention:true,dm:true,scope:'All channels',pinned:false,fwd:false,domain:false,sent:false},
+ atom:{greet:'Hi, I’m Atom. Ask me anything about work and I’ll find the answer or the right person.',lang:'English',route:'intent',primary:'it',cite:true,only:true,escalate:'it',clarify:true,skills:{pw:false,prov:false,intune:false},golden:[],gq:'',ge:''},
+ persona:'Priya · Engineering',chat:[],trace:null,await:null,w:w};
+}
+var S=fresh(),UND=[];
+function W(){return S.w[S.cur]}
+
+/* ---------- persistence, undo, change log ---------- */
+function save(){try{if(S.ver>0&&!S.resume)localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){try{var r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}}
+function clearSaved(){try{localStorage.removeItem(KEY)}catch(e){}}
+function cfg(label,fn,quiet){
+ UND.push({label:label,json:JSON.stringify(S)});if(UND.length>30)UND.shift();
+ if(!quiet)S.ver++;S.log.unshift({t:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),ws:W().name,what:label});if(S.log.length>40)S.log.pop();
+ S.err={};fn();
+}
+
+/* ---------- derived state ---------- */
+function learned(){return S.kn.src.filter(function(s){return s.status==='Learned'})}
+function failedSrc(){return S.kn.src.filter(function(s){return s.status==='Failed'})}
+function hrOpen(){return S.kn.src.filter(function(s){return s.hr&&s.aud==='All employees'})}
+function answered(){return 7+(S.kn.fixed.laptop?1:0)+(S.kn.fixed.sf?1:0)+(S.kn.fixed.room?1:0)}
+function partial(){return 2-(S.kn.fixed.laptop?1:0)-(S.kn.fixed.room?1:0)}
+function gap(){return S.kn.fixed.sf?0:1}
+function svcOf(w,id){return w.svc.filter(function(s){return s.id===id})[0]}
+function pubSvc(w){return w.svc.filter(function(s){return s.pub})}
+function grpOk(w){return w.groupsOk&&w.groups.some(function(g){return g.agents>0})}
+function cwRow(w,id){return w.cw.roster.filter(function(r){return r.id===id})[0]}
+function cwOn(w,id){var r=cwRow(w,id);return !!(r&&r.on)}
+function anyCw(w){return w.cw.roster.some(function(r){return r.on})}
+function hasSpec(w){return w.cw.roster.some(function(r){return r.kind==='Specialist'})}
+function wsCount(){return WSL.filter(function(x){return S.w[x[0]].created}).length}
+function kbText(){
+ var t='vpn globalprotect sso password reset okta wifi network guide meeting ';
+ if(S.kn.fixed.sf)t+=' salesforce request role manager security approves ';
+ if(S.kn.fixed.laptop)t+=' laptop eligibility standard developer approves ships ';
+ if(S.kn.fixed.room)t+=' facilities calendar ';
+ S.kn.verified.forEach(function(v){t+=' '+v.q+' '+v.a});return t.toLowerCase();
+}
+function goldenEval(g){
+ var q=g.q.toLowerCase();
+ if(/atlas|project|delay/.test(q)){
+  var j=S.kn.src.filter(function(s){return s.type==='Jira'&&s.status==='Learned'}).length;
+  return j?ok('Atom reasoned over Jira phases, owners and comments.'):no('Atom needs Jira to reason over project phases and owners. Jira isn’t a learned source yet.',{m:'knowledge',s:0,l:'Add Jira as a source'});
+ }
+ var words=g.e.toLowerCase().split(/\W+/).filter(function(x){return x.length>4}),kb=kbText();
+ var miss=words.filter(function(x){return kb.indexOf(x)<0});
+ return miss.length?no('Atom’s answer would be missing: '+miss.slice(0,3).join(', ')+'. Add it to an article or a verified answer.',{m:'knowledge',s:1,l:'Add a verified answer'}):ok('Matches the expected answer.');
+}
+function ok(n){return{ok:true,note:n||''}}
+function no(r,f){return{ok:false,reason:r,fix:f}}
+
+/* ---------- scenarios (generated from the configuration) ---------- */
+var SCEN=[
+ {id:'a1',m:'atom',n:'Get an answer from knowledge',crit:1,why:'Atom answers a common question and cites its source.',chk:function(w){return learned().length?ok():no('Atom has no learned knowledge sources to answer from.',{m:'knowledge',s:0,l:'Add a knowledge source'})}},
+ {id:'a2',m:'atom',n:'File a ticket',crit:1,why:'A request becomes a ticket in the right workspace.',chk:function(w){if(!pubSvc(w).length)return no('No service is published, so Atom has nothing to file against.',{m:'service',s:3,l:'Publish a service'});if(!grpOk(w))return no('No confirmed agent group, so the ticket would have nowhere to land.',{m:'service',s:1,l:'Confirm agent groups'});return ok()}},
+ {id:'a3',m:'atom',n:'Trigger a workflow',crit:1,why:'A request starts its approval workflow.',chk:function(w){var m=w.wf.main,s=svcOf(w,m.svc);if(!s||!s.pub)return no('“'+(s?s.n:'The service')+'” isn’t published, so Atom can’t start its workflow.',{m:'service',s:3,l:'Publish the service'});if(m.status!=='Published')return no('The approval workflow is still a draft.',{m:'workflows',s:0,l:'Publish the workflow'});return ok()}},
+ {id:'a4',m:'atom',n:'Invoke an AI coworker',crit:1,why:'Atom hands a task to a coworker and gets the result back.',ap:function(w){return hasSpec(w)&&anyCw(w)},chk:function(w){return cwOn(w,'triage')?ok():no('The triage coworker is off, so nothing receives the hand-off.',{m:'coworker',s:0,l:'Enable the triage coworker'})}},
+ {id:'a5',m:'atom',n:'Hand off to a human',crit:1,why:'An unresolved question reaches an agent with the conversation attached.',chk:function(w){var e=S.w[S.atom.escalate];if(!e||!e.created)return no('Escalations point to a workspace that isn’t set up.',{m:'atom',s:0,l:'Choose an escalation workspace'});return grpOk(e)?ok():no('The escalation workspace has no confirmed agent group.',{m:'service',s:1,l:'Confirm agent groups'})}},
+ {id:'i1',m:'identity',n:'Directory sync completes',crit:1,why:'People, groups and managers are imported.',chk:function(){return S.id.okta?ok():no('Okta isn’t connected.',{m:'identity',s:0,l:'Connect Okta'})}},
+ {id:'i2',m:'identity',n:'Every person has an approver',crit:1,why:'Manager approvals can’t stall for people without a manager.',chk:function(){return S.id.fallback?ok():no('37 people have no manager. Manager approvals would stall for them.',{m:'identity',s:1,l:'Set a fallback approver'})}},
+ {id:'i3',m:'identity',n:'At least two organization admins',crit:1,why:'The setup isn’t dependent on one person.',chk:function(){return S.id.admins.length>=2?ok():no('Only one organization admin. If they’re away, nobody can change settings.',{m:'identity',s:1,l:'Add an organization admin'})}},
+ {id:'k1',m:'knowledge',n:'Critical questions are answered',crit:1,why:'The ten most common IT questions return an answer.',chk:function(){if(!learned().length)return no('No learned sources yet.',{m:'knowledge',s:0,l:'Add a knowledge source'});return S.kn.fixed.sf?ok():no('“How do I request Salesforce access?” has no answer.',{m:'knowledge',s:2,l:'Close the gap'})}},
+ {id:'k2',m:'knowledge',n:'Restricted content stays restricted',crit:1,why:'An ordinary employee can’t get answers from restricted sources.',chk:function(){var h=hrOpen();return h.length?no('“'+h[0].name+'” is visible to all employees. Atom would answer HR policy questions for everyone.',{m:'knowledge',s:0,l:'Restrict the audience'}):ok()}},
+ {id:'k3',m:'knowledge',n:'All sources learned without errors',crit:1,why:'Every connected source finished processing.',chk:function(){var f=failedSrc();return f.length?no('“'+f[0].name+'” failed: Atomicwork can’t read the space. Add the integration user to it and retry.',{m:'knowledge',s:0,l:'Fix the source'}):ok()}},
+ {id:'c1',m:'channels',n:'A message reaches an employee',crit:1,why:'Atom can send and receive in the chat channel.',chk:function(){if(!(S.ch.teams||S.ch.slack))return no('No chat channel is connected.',{m:'channels',s:0,l:'Connect a channel'});return S.ch.sent?ok():no('No test message has been sent yet.',{m:'channels',s:1,l:'Send a test message'})}},
+ {id:'c2',m:'channels',n:'@mention works in a channel',crit:1,why:'Employees can ask Atom in a team channel.',chk:function(){return (S.ch.teams&&S.ch.mention)?ok():no('@mentions are off or Teams isn’t connected.',{m:'channels',s:0,l:'Turn on @mentions'})}},
+ {id:'c3',m:'channels',n:'The employee portal loads',crit:0,why:'The portal is reachable by employees.',chk:function(){return ok('Portal reachable.')}},
+ {id:'s1',m:'service',n:'A ticket reaches the right group',crit:1,why:'Routing puts a new ticket in a group that has agents.',chk:function(w){return grpOk(w)?ok():no('No confirmed agent group with agents.',{m:'service',s:1,l:'Confirm agent groups'})}},
+ {id:'s2',m:'service',n:'The SLA clock starts on creation',crit:1,why:'Every enabled request type has an SLA policy.',chk:function(w){return w.slasOk?ok():no('SLA policies aren’t confirmed, so tickets would have no due time.',{m:'service',s:2,l:'Confirm SLA policies'})}},
+ {id:'s3',m:'service',n:'The SLA pauses while waiting on a vendor',crit:0,why:'Incidents waiting on a vendor aren’t marked as breached.',chk:function(w){var bad=w.slas.filter(function(s){return s.type==='Incident'&&s.pause.indexOf('Waiting on vendor')<0});return bad.length?no('“'+bad[0].n+'” keeps counting while an incident waits on a vendor. It would breach for reasons outside the team’s control.',{m:'service',s:2,l:'Add the pause status'}):ok()}},
+ {id:'s4',m:'service',n:'Assignment skips away agents',crit:0,why:'Round robin gives work only to available agents.',chk:function(w){var m=w.groups.filter(function(g){return g.assign==='Manual'});return m.length?no('“'+m[0].n+'” uses manual assignment, so new tickets wait for someone to pick them up.',{m:'service',s:1,l:'Change assignment'}):ok()}},
+ {id:'w1',m:'workflows',n:'The approval path completes',crit:1,why:'A request goes through approval and is provisioned.',chk:function(w){var m=w.wf.main;if(m.status!=='Published')return no('The approval workflow is a draft.',{m:'workflows',s:0,l:'Publish the workflow'});if(m.approver==='Reporting manager'&&!S.id.fallback)return no('Some requests would stall: 37 people have no manager and there’s no fallback approver.',{m:'identity',s:1,l:'Set a fallback approver'});return ok()}},
+ {id:'w2',m:'workflows',n:'A decline notifies the requester',crit:0,why:'Declined requests don’t go silent.',chk:function(w){return w.wf.main.notifyDecline?ok():no('Nothing tells the requester when a request is declined.',{m:'workflows',s:0,l:'Turn on the decline message'})}},
+ {id:'w3',m:'workflows',n:'Stalled approvals remind, then escalate',crit:0,why:'An approval left unanswered doesn’t sit forever.',chk:function(w){return w.wf.main.remind?ok():no('Approvals have no reminder or escalation. A request can wait indefinitely.',{m:'workflows',s:0,l:'Turn on reminders'})}},
+ {id:'w4',m:'workflows',n:'High-risk apps need Security approval',crit:1,why:'Access to high-risk apps can’t be granted on a manager’s approval alone.',ap:function(w){return w.apps.length>0},chk:function(w){var b=w.apps.filter(function(a){return a.risk==='High'&&a.pol!=='Manager + Security'});return b.length?no('“'+b[0].n+'” is high risk but needs only '+b[0].pol.toLowerCase()+' approval.',{m:'workflows',s:1,l:'Review access policies'}):ok()}},
+ {id:'x1',m:'coworker',n:'Triage assigns the right specialist',crit:1,why:'The triage coworker routes work to a specialist.',ap:function(w){return cwOn(w,'access')},chk:function(w){return cwOn(w,'triage')?ok():no('The triage coworker is off.',{m:'coworker',s:0,l:'Enable the triage coworker'})}},
+ {id:'x2',m:'coworker',n:'The specialist reads and acts through its tools',crit:1,why:'The specialist can look up a user and perform its allowed action.',ap:function(w){return cwOn(w,'access')},chk:function(w){return (S.id.okta&&w.cw.tools.okta_read)?ok():no('Okta isn’t connected, or the read capability is off.',{m:'identity',s:0,l:'Connect Okta'})}},
+ {id:'x3',m:'coworker',n:'Boundaries are respected',crit:1,why:'Destructive actions need a human.',ap:function(w){return cwOn(w,'access')},chk:function(w){return (!w.cw.tools.okta_deactivate||w.cw.goal.humanDestructive)?ok():no('“Deactivate user” is enabled without a human approval boundary.',{m:'coworker',s:0,l:'Add the boundary'})}},
+ {id:'x4',m:'coworker',n:'A resolution comment is posted',crit:1,why:'The requester is told what was done when the ticket is resolved.',ap:function(w){return cwOn(w,'access')},chk:function(w){return w.cw.goal.note?ok():no('The coworker resolved the ticket but left no comment. Its Goal’s end-of-run settings don’t include posting a public note.',{m:'coworker',s:0,l:'Open Goal: end of run'})}}
+];
+function sc(id){return SCEN.filter(function(s){return s.id===id})[0]}
+function scApplies(s,w){return !s.ap||s.ap(w)}
+function sstate(s,w){
+ if(!scApplies(s,w))return 'na';
+ if(w.run[s.id])return 'run';
+ var r=w.R[s.id];if(!r)return 'idle';if(r.ver!==S.ver)return 'stale';return r.ok?'pass':'fail';
+}
+function runIds(ids){
+ var w=W();ids=ids.filter(function(id){return scApplies(sc(id),w)});if(!ids.length)return;
+ ids.forEach(function(id){w.run[id]=true});render();
+ ids.forEach(function(id,n){later(function(){
+  var r=sc(id).chk(w);r.ver=S.ver;w.R[id]=r;delete w.run[id];
+  if(n===ids.length-1){var f=ids.filter(function(i){return !w.R[i].ok}).length;toast(f?f+' of '+ids.length+' scenarios failed. See the reasons below.':'All '+ids.length+' scenarios passed.')}
+  render();
+ },380*(n+1))});
+}
+function modScen(m){return SCEN.filter(function(s){return s.m===m})}
+function checkGroups(){return[
+ {t:'Identity and people',ids:['i1','i2','i3'],m:'identity',s:2},
+ {t:'Knowledge is governed',ids:['k1','k2','k3'],m:'knowledge',s:2},
+ {t:'Channel verified',ids:['c1','c2'],m:'channels',s:1},
+ {t:'Service desk ready',ids:['s1','s2','a2'],m:'service',s:4},
+ {t:'Approvals and access validated',ids:['w1','w4','a3'],m:'workflows',s:2},
+ {t:'Atom works end to end',ids:['a1','a4','a5','x1','x2','x3','x4'],m:'atom',s:3}
+]}
+function checks(){
+ var w=W(),out=checkGroups().map(function(g){
+  var st='pass',fail=null,idle=0,stale=0,n=0;
+  g.ids.forEach(function(id){var s=sc(id),x=sstate(s,w);if(x==='na')return;n++;if(x==='fail'&&!fail){fail=w.R[id]}if(x==='idle')idle++;if(x==='stale')stale++});
+  if(fail)st='fail';else if(idle)st='idle';else if(stale)st='stale';
+  return{t:g.t,st:st,fail:fail,idle:idle,stale:stale,n:n,m:g.m,s:g.s,ids:g.ids};
+ });
+ out.push({t:'Pilot group chosen',st:w.pilot?'pass':'idle',m:'golive',s:2,ids:[],n:1,fail:null,idle:w.pilot?0:1,stale:0,pilotCheck:true});
+ return out;
+}
+function nPass(){return checks().filter(function(c){return c.st==='pass'}).length}
+
+/* ---------- to-do tasks per module ---------- */
+function T(t,req,s,tab,note){return{t:t,req:req,s:s,tab:tab,note:note||''}}
+function tasks(m){
+ var w=W(),I=S.id,K=S.kn,C=S.ch,A=S.atom;
+ switch(m){
+ case 'identity':return[
+  T('Connect Okta',1,I.okta?'done':'todo',0,'Detected from your sign-in domain'),
+  T('Import users, groups and managers',1,I.okta?'auto':'todo',0,'Atomicwork does this once Okta connects'),
+  T('Confirm attribute mapping',1,I.mapOk?'done':(I.okta?'review':'todo'),1,'Prefilled: department, location, manager'),
+  T('Choose a fallback approver for people without a manager',1,I.fallback?'done':(I.okta?'todo':'todo'),1,'37 people have no manager'),
+  T('Add a second organization admin',1,I.admins.length>=2?'done':'todo',1,'So setup doesn’t depend on one person')];
+ case 'knowledge':return[
+  T('Add a knowledge source',1,learned().length?'done':'todo',0,'Atom answers only from learned sources'),
+  T('Set who can see each source',1,(K.src.length&&!hrOpen().length)?'done':(K.src.length?'todo':'todo'),0,'Permissions are inherited from SharePoint'),
+  T('Resolve failed sources',1,(K.src.length&&!failedSrc().length)?'done':(K.src.length?'todo':'todo'),0,''),
+  T('Close the critical answer gap',1,K.fixed.sf?'done':'todo',2,'Salesforce access has no answer today'),
+  T('Add verified answers for common questions',0,K.verified.length>=2?'done':'todo',1,'One correct answer each')];
+ case 'channels':return[
+  T('Connect Microsoft Teams or Slack',1,(C.teams||C.slack)?'done':'todo',0,''),
+  T('Allow DMs and @mentions',1,(C.dm&&C.mention)?'auto':'review',0,'On by default'),
+  T('Send a test message',1,C.sent?'done':'todo',1,''),
+  T('Set up email forwarding',0,C.fwd?'done':'todo',0,''),
+  T('Use a custom portal domain',0,C.domain?'done':'todo',0,'')];
+ case 'atom':return[
+  T('Choose how requests are routed',1,'auto',0,'Atom routes by intent. Change if you prefer'),
+  T('Choose where unresolved questions go',1,'auto',0,'Defaults to the IT service desk'),
+  T('Run the Atom scenarios',1,atomRan(w)?'done':'todo',3,'Five working states, generated for you'),
+  T('Enable an Atom skill',0,(A.skills.pw||A.skills.prov||A.skills.intune)?'done':'todo',1,''),
+  T('Add your own test questions',0,A.golden.length?'done':'todo',3,'Your real questions, not ours')];
+ case 'workflows':return[
+  T('Review app risk and access policies',1,w.appsOk?'done':'review',1,'Risk levels suggested from each app’s permissions'),
+  T('Publish the Software access approval',1,w.wf.main.status==='Published'?'done':'todo',0,''),
+  T('Run the approval scenarios',1,wfRan(w)?'done':'todo',2,''),
+  T('Turn on reminders and escalation',0,w.wf.main.remind?'done':'todo',0,''),
+  T('Publish the P1 incident notification',0,w.wf.p1.status==='Published'?'done':'todo',0,'')];
+ case 'coworker':return[
+  T('Enable the triage coworker',0,cwOn(w,'triage')?'done':'todo',0,'Pre-tuned by Atomicwork'),
+  T('Review boundaries and tools',0,cwOn(w,'access')?'done':'todo',0,''),
+  T('Set what happens at end of run',0,w.cw.goal.note?'done':'todo',0,''),
+  T('Run the coworker scenarios',0,cwRan(w)?'done':'todo',1,'')];
+ case 'service':return[
+  T('Confirm request types',1,w.typesOk?'done':'review',0,'Recommended for '+(w.kind==='it'?'IT: all four':'this team type')),
+  T('Confirm agent groups and assignment',1,w.groupsOk?'done':'review',1,'Built from your directory groups'),
+  T('Confirm business hours',1,w.hoursOk?'done':'review',2,'Read from your Microsoft 365 tenant'),
+  T('Confirm SLA policies',1,w.slasOk?'done':'review',2,''),
+  T('Publish at least one service',1,pubSvc(w).length?'done':'todo',3,'Atom can only offer published services'),
+  T('Turn on the satisfaction survey',0,w.csat?'done':'todo',3,'')];
+ case 'wssettings':return[T('Name and describe the workspace',0,w.desc?'done':'todo',0,''),T('Review members and roles',0,'review',1,'')];
+ }
+ return[];
+}
+function ranAll(ids,w){var any=false;for(var i=0;i<ids.length;i++){var x=sstate(sc(ids[i]),w);if(x==='na')continue;any=true;if(x!=='pass')return false}return any}
+function atomRan(w){return ranAll(['a1','a2','a3','a4','a5'],w)}
+function wfRan(w){return ranAll(['w1','w4'],w)}
+function cwRan(w){return ranAll(['x1','x2','x3','x4'],w)}
+function prog(m){var ts=tasks(m).filter(function(t){return t.req});var d=ts.filter(function(t){return t.s==='done'||t.s==='auto'}).length;return{d:d,n:ts.length}}
+function status(id){
+ if(id==='welcome')return S.plan?'done':'todo';
+ if(id==='wssettings')return 'opt';
+ if(id==='golive')return W().rollout.started?'done':(nPass()>0?'prog':'todo');
+ var p=prog(id),ts=tasks(id);
+ if(p.n&&p.d===p.n)return 'done';
+ var any=ts.some(function(t){return t.s==='done'&&!(t.s==='auto')});
+ if(id==='coworker'){var all=ts.every(function(t){return t.s==='done'});return all?'done':(ts.some(function(t){return t.s==='done'})?'prog':'todo')}
+ return p.d>0&&ts.some(function(t){return t.s==='done'})?'prog':'todo';
+}
+var LBL={done:'Done',prog:'In progress',todo:'To do',opt:'Optional'};
+var PCL={done:'ok',prog:'warn',todo:'',opt:'acc'};
+function pillFor(id){var s=status(id);return pill(LBL[s],PCL[s])}
+function nextMod(){for(var i=0;i<ORDER.length;i++){var id=ORDER[i];if(id==='golive'){if(nPass()<7)return mod(id);continue}if(prog(id).n===0)continue;if(status(id)!=='done')return mod(id)}return null}
+function nextTask(m){var ts=tasks(m).filter(function(t){return t.req&&t.s!=='done'&&t.s!=='auto'});return ts[0]||null}
+var WHY={identity:'Connect Okta and Atomicwork imports your people, groups and managers.',knowledge:'Atom answers only from knowledge it has learned. Add a source and set who can see it.',channels:'Connect Teams so employees can reach Atom, then send a test message.',atom:'Review routing and run the five Atom scenarios.',service:'Confirm the prefilled request types, groups, hours and SLAs, then publish a service.',workflows:'Review app risk, then publish the approval workflow.',coworker:'Optional: enable triage and review the specialist’s boundaries.',golive:'Pass the remaining required checks and start the rollout.'};
+
+/* ---------- helpers ---------- */
+var toastT;
+function toast(m){var t=$('#toast');t.textContent=m;t.className='toast on';clearTimeout(toastT);toastT=setTimeout(function(){t.className='toast'},2800)}
+function up(){window.scrollTo(0,0)}
+function later(fn,ms){return setTimeout(fn,ms)}
+function openMod(m,s){S.mod=m;S.step=s||0;S.visited[m]=true;S.menu=false;S.err={};render();up()}
+function setPath(path,val){var p=path.split('.'),o=S;for(var i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=val}
+function errBox(k){return S.err[k]?'<div class="err" role="alert">'+ico('warn')+'<span>'+S.err[k]+'</span></div>':''}
+function help(t,body){return '<details class="help"><summary>'+t+'</summary><p>'+body+'</p></details>'}
+function pre(items,src){return '<div class="hint ok" style="margin-bottom:14px">'+ico('bulb')+'<div><b>Prefilled by Atomicwork</b> from '+src+'<div class="small" style="margin-top:2px">'+items+'</div></div></div>'}
+function tg(a,on,label,data){return '<label class="tg"><input type="checkbox" data-c="'+a+'" '+(data||'')+' '+(on?'checked':'')+'> '+label+'</label>'}
+function sel(a,opts,val,extra){return '<select class="s" data-c="'+a+'" '+(extra||'')+' aria-label="'+a+'">'+opts.map(function(o){return '<option'+(o===val?' selected':'')+'>'+o+'</option>'}).join('')+'</select>'}
+function nav(back,next){return '<div class="foot">'+(back||'')+'<span class="sp"></span>'+(next||'')+'</div>'}
+function backBtn(step){return '<button class="btn sec" data-a="step" data-v="'+step+'">Back</button>'}
+function openBtn(m,label,s,cls){return '<button class="btn '+(cls||'')+'" data-a="open" data-m="'+m+'" data-s="'+(s||0)+'">'+label+'</button>'}
+function fixBtn(f){return '<button class="btn sm" data-a="open" data-m="'+f.m+'" data-s="'+f.s+'">'+esc(f.l)+'</button>'}
+
+/* ---------- shell ---------- */
+function shell(){
+ var m=mod(S.mod),w=W(),n=nPass();
+ return '<header class="top"><button class="brand" data-a="hub" aria-label="Setup plan">atomicwork</button><span class="sp"></span>'+wsMenu()+
+  '<span class="pill rd '+(n===7?'ok':'warn')+'" title="Required go-live checks">'+esc(w.name)+': '+n+' of 7 required checks</span>'+
+  '<button class="btn sec sm" data-a="drawer" aria-label="Change log">'+ico('undo')+' Changes'+(S.log.length?' ('+S.log.length+')':'')+'</button>'+
+  '<button class="btn sec sm" data-a="theme" aria-label="Toggle dark mode">'+ico('moon')+'</button></header>'+
+  '<div class="shell"><nav class="side" aria-label="Setup">'+side()+'</nav><main id="main"><div class="wrap">'+modView(m)+'</div></main></div>'+(S.drawer?drawer():'');
+}
+function drawer(){
+ return '<aside class="drawer" role="dialog" aria-label="Change log"><div class="row"><h3 class="sp">Change log</h3><button class="btn sec sm" data-a="drawer">Close</button></div>'+
+  '<p class="muted small" style="margin:6px 0 12px">Every configuration change is recorded. You can undo the most recent one. Progress is saved in this browser.</p>'+
+  '<button class="btn sm" data-a="undo" '+(UND.length?'':'disabled')+'>'+ico('undo')+' Undo last change</button>'+
+  (S.log.length?S.log.map(function(l){return '<div class="lg"><div><b>'+esc(l.what)+'</b></div><div class="muted small">'+l.t+' · '+esc(l.ws)+' workspace · you</div></div>'}).join(''):'<p class="muted" style="margin-top:14px">No changes yet.</p>')+'</aside>';
+}
+function wsMenu(){
+ var w=W();
+ var h='<div class="wsm"><button class="btn sec sm" data-a="menu" aria-haspopup="listbox" aria-expanded="'+S.menu+'"><span class="muted" style="font-weight:500">Workspace</span>&nbsp;<b>'+esc(w.name)+'</b><span class="caret"></span></button>';
+ if(S.menu){
+  h+='<div class="menu" role="listbox">'+WSL.map(function(x){var o=S.w[x[0]];
+   return '<button class="mi '+(S.cur===x[0]?'on':'')+'" role="option" aria-selected="'+(S.cur===x[0])+'" data-a="pickws" data-v="'+x[0]+'"><span>'+esc(o.name)+'</span><span class="sp"></span>'+pill(S.cur===x[0]?'Selected':(o.created?'Set up':'Not set up'),o.created?'ok':'')+'</button>';
+  }).join('')+'<div class="mfoot">Connections and Atom are shared by every workspace.</div></div>';
+ }
+ return h+'</div>';
+}
+function navBtn(m){var s=status(m.id);return '<button class="nav '+(m.g?'sub':'')+' '+(S.mod===m.id?'on':'')+'" data-a="open" data-m="'+m.id+'">'+m.t+(s==='opt'?'':'<span class="dot '+s+'" title="'+LBL[s]+'"></span>')+'</button>'}
+function side(){
+ var h=navBtn(mod('welcome'));
+ ['Connections','Configure'].forEach(function(g){h+='<div class="sgrp">'+g+'</div>';MODS.filter(function(m){return m.g===g}).forEach(function(m){h+=navBtn(m)})});
+ return h+'<div class="divider"></div>'+navBtn(mod('wssettings'))+navBtn(mod('golive'));
+}
+
+/* ---------- module frame ---------- */
+function strip(m){
+ var ts=tasks(m);if(!ts.length)return '';
+ var p=prog(m),open=!!S.strip[m];
+ var h='<div class="strip"><button data-a="strip" data-m="'+m+'" aria-expanded="'+open+'"><b>To-do</b><span class="muted">'+(p.n?p.d+' of '+p.n+' required done':'All optional')+'</span><span class="sp"></span><span class="bar" style="width:120px"><i style="width:'+(p.n?Math.round(p.d/p.n*100):0)+'%"></i></span><span class="caret"></span></button>';
+ if(open)h+=ts.map(function(t){
+  var st={done:pill(ico('check')+'Done','ok'),auto:pill(ico('bulb')+'Done for you','ok'),review:pill('Review','warn'),todo:pill('To do')}[t.s];
+  return '<button class="tk" data-a="step" data-v="'+t.tab+'"><span class="sp"><b>'+t.t+'</b> '+(t.req?'':'<span class="muted small">Optional</span>')+(t.note?'<div class="muted small">'+t.note+'</div>':'')+'</span>'+st+'</button>';
+ }).join('');
+ return h+'</div>';
+}
+function modView(m){
+ var w=W();
+ var scope=m.scope==='org'?pill('Org-wide'):pill(esc(w.name)+' workspace','acc');
+ var h='<div class="mh">'+(m.g?'<span class="ph">'+m.g+'</span>':'')+'<div class="tl2"><h1>'+m.t+'</h1>'+scope+'</div><p>'+m.d+'</p>'+
+  (m.uses||m.feeds?'<div class="conn">'+(m.uses?'<span>Uses: <b>'+m.uses+'</b></span>':'')+(m.feeds?'<span>Feeds: <b>'+m.feeds+'</b></span>':'')+'</div>':'')+'</div>';
+ if(m.scope==='ws'&&!w.created)return h+emptyWs();
+ h+=(m.id==='welcome'||m.id==='golive'?'':strip(m.id));
+ h+='<div class="tabs" role="tablist">'+m.tabs.map(function(t,i){return '<button role="tab" aria-selected="'+(i===S.step)+'" class="'+(i===S.step?'on':'')+'" data-a="step" data-v="'+i+'">'+t+'</button>'}).join('')+'</div>';
+ return h+((SCREENS[m.id][S.step]||function(){return ''})());
+}
+function emptyWs(){
+ var w=W(),lighter=w.kind!=='it';
+ return '<div class="card empty stack" style="align-items:center"><h2 style="font-size:26px">'+esc(w.name)+' workspace isn’t set up yet</h2><p class="muted" style="max-width:56ch">A workspace keeps its own tickets, services, workflows, coworkers and settings. Connections and Atom are shared, so you only configure what is specific to '+esc(w.name)+'.'+(lighter?' We recommend a lighter setup for non-IT teams: service requests and incidents.':'')+'</p>'+
+  '<div class="row wrapr" style="justify-content:center"><button class="btn" data-a="createws">Create with the recommended template</button></div>'+
+  help('Workspace or group?','Create a workspace when the team has its own workflows, SLAs, approvers or reporting needs, or when data must stay separate. If the team just needs its own queue under shared policies, create a group inside an existing workspace instead.')+'</div>';
+}
+
+/* ---------- test panel (shared) ---------- */
+function scenRow(s){
+ var w=W(),x=sstate(s,w),r=w.R[s.id];
+ if(x==='na')return '<div class="li"><div class="sp"><div class="t">'+s.n+'</div><div class="muted small">Not applicable: no specialist coworker is enabled.</div></div>'+pill('N/A')+'</div>';
+ var st={run:pill('<i class="spin"></i>Running','warn'),idle:pill('Not run'),stale:pill('Out of date','warn'),pass:pill(ico('check')+'Passed','ok'),fail:pill('Failed','bad')}[x];
+ var body='';
+ if(x==='fail')body='<div class="err">'+ico('warn')+'<div class="stack" style="gap:8px"><span><b>What went wrong:</b> '+esc(r.reason)+'</span><span>'+fixBtn(r.fix)+'</span></div></div>';
+ if(x==='stale')body='<div class="muted small" style="margin-top:6px">Configuration changed since this last ran. Run it again.</div>';
+ if(x==='pass'&&r.note)body='<div class="muted small" style="margin-top:6px">'+esc(r.note)+'</div>';
+ return '<div style="border-bottom:1px solid var(--line)"><div class="li" style="border:0"><div class="sp"><div class="t">'+s.n+' '+pill(s.crit?'Required':'Recommended',s.crit?'acc':'')+'</div><div class="muted small">'+s.why+'</div>'+body+'</div>'+st+'</div></div>';
+}
+function testPanel(m,extra){
+ var w=W(),list=modScen(m),ids=list.map(function(s){return s.id});
+ var counts={pass:0,fail:0,idle:0,stale:0,na:0,run:0};list.forEach(function(s){counts[sstate(s,w)]++});
+ return '<div class="row wrapr" style="margin-bottom:12px"><div class="sp"><b>Scenarios generated from your configuration</b><div class="muted small">'+counts.pass+' passed · '+counts.fail+' failed · '+(counts.idle+counts.stale)+' to run</div></div><button class="btn" data-a="runids" data-v="'+ids.join(',')+'">Run these scenarios</button></div>'+
+  '<div class="list">'+list.map(scenRow).join('')+'</div>'+(extra||'');
+}
+
+/* ---------- screens ---------- */
+var SCREENS={};
+
+/* welcome */
+function mapBox(id,sub){var m=mod(id);return '<button class="mbox" data-a="open" data-m="'+id+'"><b>'+m.t+'</b><span class="muted small">'+sub+'</span><div style="margin-top:6px">'+pillFor(id)+'</div></button>'}
+function hubScreen(){
+ var w=W(),n=nPass(),nx=nextMod(),circ=2*Math.PI*56,off=circ*(1-n/7);
+ var h='';
+ if(S.resume)h+='<div class="hint info" style="margin-bottom:16px">'+ico('bulb')+'<div class="sp"><b>You have saved progress.</b> '+S.resume.ver+' changes from an earlier session.</div><button class="btn sm" data-a="resume">Resume</button><button class="btn sec sm" data-a="discard">Start fresh</button></div>';
+ h+='<div class="hero"><div><h2>Let’s get Northwind IT live</h2><p class="muted" style="font-size:18px;max-width:56ch">Atomicwork has prefilled what it can. Your job is to confirm the decisions that carry risk, then let the scenarios prove it works. Readiness comes from those tests, not from ticking boxes.</p></div>'+
+  '<div class="ringbox"><div class="ring"><svg viewBox="0 0 140 140"><circle cx="70" cy="70" r="56" fill="none" stroke="var(--line)" stroke-width="13"/><circle cx="70" cy="70" r="56" fill="none" stroke="var(--accent)" stroke-width="13" stroke-linecap="round" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"/></svg><b>'+n+'/7</b></div><span class="muted small">required checks passed</span></div></div>';
+ if(nx){var nt=nextTask(nx.id);h+='<div class="next"><div class="sp"><div class="small" style="opacity:.85">Next best step</div><b>'+nx.t+'</b><div style="opacity:.9">'+(nt?nt.t:WHY[nx.id])+'</div></div><button class="btn amber" data-a="open" data-m="'+nx.id+'" data-s="'+(nt?nt.tab:0)+'">'+(status(nx.id)==='todo'?'Start':'Continue')+'</button></div>'}
+ else h+='<div class="next"><div class="sp"><b>Everything is configured</b><div style="opacity:.9">Start the staged rollout from Go-live readiness.</div></div></div>';
+ h+='<h2 class="sec-h">How the pieces fit</h2><div class="card map">'+
+  '<div class="mlab">CONNECTIONS (shared by every workspace)</div><div class="mrow" style="grid-template-columns:repeat(3,1fr)">'+mapBox('identity','People, groups, managers')+mapBox('knowledge','What Atom answers from')+mapBox('channels','Where employees reach Atom')+'</div>'+
+  '<div class="warr">&darr;</div><div class="mlab">FRONT DOOR (shared)</div><div class="mrow" style="grid-template-columns:1fr">'+mapBox('atom','Understands the request, answers, files, triggers, hands off')+'</div>'+
+  '<div class="warr">&darr;</div><div class="mlab">PER WORKSPACE ('+esc(w.name)+')</div><div class="mrow" style="grid-template-columns:repeat(3,1fr)">'+mapBox('service','Tickets, groups, SLAs, catalog')+mapBox('workflows','Approvals and access')+mapBox('coworker','Specialists with tools')+'</div></div>';
+ h+='<h2 class="sec-h">Your setup plan</h2><div class="list">'+ORDER.filter(function(i){return i!=='golive'}).map(function(id){
+  var m=mod(id),p=prog(id),nt=nextTask(id);
+  return '<div class="li"><div style="width:190px"><div class="t">'+m.t+'</div><div class="muted small">'+(m.scope==='org'?'Org-wide':esc(w.name)+' workspace')+'</div></div><div class="sp"><div class="bar"><i style="width:'+(p.n?Math.round(p.d/p.n*100):0)+'%"></i></div><div class="muted small" style="margin-top:4px">'+(p.n?p.d+' of '+p.n+' required done':'Optional')+(nt?' · Next: '+nt.t:'')+'</div></div>'+pillFor(id)+'<button class="btn sec sm" data-a="open" data-m="'+id+'" data-s="'+(nt?nt.tab:0)+'">'+(status(id)==='done'?'Review':'Open')+'</button></div>';
+ }).join('')+'<div class="li"><div style="width:190px"><div class="t">Go-live readiness</div><div class="muted small">'+esc(w.name)+' workspace</div></div><div class="sp"><div class="bar"><i style="width:'+Math.round(n/7*100)+'%"></i></div><div class="muted small" style="margin-top:4px">'+n+' of 7 required checks</div></div>'+pillFor('golive')+'<button class="btn sec sm" data-a="open" data-m="golive">Open</button></div></div>';
+ h+='<div class="demo"><b>Demo tools</b><span class="muted small sp">Jump ahead or start over while presenting.</span><button class="btn sec sm" data-a="auto">Fill in everything except the rollout</button><button class="btn sec sm" data-a="reset">Reset demo</button></div>';
+ return h;
+}
+function grp(label,k,opts,multi){
+ return '<div class="stack" style="gap:8px;margin-top:14px"><b>'+label+'</b><div class="chips">'+opts.map(function(o){
+  var on=multi?S.ans[k].indexOf(o)>-1:S.ans[k]===o;
+  return '<button class="chip '+(on?'on':'')+'" aria-pressed="'+on+'" data-a="ans" data-k="'+k+'" data-v="'+o+'" data-multi="'+(multi?1:0)+'">'+o+'</button>';
+ }).join('')+'</div></div>';
+}
+SCREENS.welcome=[
+ hubScreen,
+ function(){
+  return '<div class="card"><div class="hint ok" style="margin-bottom:6px">'+ico('bulb')+'<div><b>Detected from your sign-in. Nothing to type.</b><div class="chips" style="margin-top:8px"><span class="pill">northwind.com</span><span class="pill">Microsoft 365 tenant</span><span class="pill">Okta SSO</span><span class="pill">Microsoft Teams in use</span></div><div class="small" style="margin-top:6px">Company size comes from your directory once Okta is connected.</div></div></div>'+
+   grp('What should Atom help with first?','pains',['Access requests','Device issues','Password resets','New hires','Software requests'],true)+
+   grp('Which team launches first?','first',['IT','HR','Finance','Facilities'],false)+
+   '<div class="hint info" style="margin-top:16px">'+ico('bulb')+'<span>Those two answers choose your starter services, which coworker we suggest, and the order of your setup plan.</span></div></div>'+
+   nav('','<button class="btn" data-a="confirmplan">Confirm and see my setup plan</button>');
+ }
+];
+
+/* identity */
+SCREENS.identity=[
+ function(){
+  var I=S.id;
+  var st=I.okta?pill(ico('check')+'Connected','ok'):(I.busy?pill('<i class="spin"></i>Connecting','warn'):'<button class="btn" data-a="connectokta">Connect</button>');
+  var h='<div class="list"><div class="li"><span class="tile">O</span><div class="sp"><div class="t">Okta '+pill('Detected','acc')+'</div><div class="muted">Imports users, groups, managers and your app catalog</div></div>'+st+'</div></div>';
+  h+='<p class="muted small" style="margin-top:10px">Also available: Microsoft Entra ID and Google Workspace. Users can also be imported by CSV.</p>';
+  if(I.okta){
+   h+=pre('2,847 users, 63 groups and the manager hierarchy imported. 38 apps found in your Okta catalog. Three agent groups suggested from IT directory groups.','Okta');
+   h=h.replace('margin-bottom:14px','margin:16px 0 14px');
+   h+='<div class="card stack"><b>Sync settings</b><div class="row wrapr"><span style="width:200px">Sync frequency</span>'+sel('sync',['Every hour','Every 4 hours','Daily'],I.sync)+'</div><div>'+tg('deprov',I.deprov,'Remove access in Atomicwork when someone is deactivated in Okta')+help('Why is this on?','Leavers should lose access everywhere. Turning this off means people removed in Okta can still raise requests until an admin removes them.')+'</div></div>';
+  }
+  return h+nav('','<button class="btn" data-a="step" data-v="1" '+(I.okta?'':'disabled')+'>Review people and roles</button>');
+ },
+ function(){
+  var I=S.id;
+  if(!I.okta)return '<div class="hint">'+ico('warn')+'<span>Connect Okta first. <button class="link" data-a="step" data-v="0">Go to Connect</button></span></div>';
+  var h='<div class="grid3"><div class="stile acc"><span class="big">2,847</span><span>people</span></div><div class="stile acc"><span class="big">63</span><span>groups</span></div><div class="stile warn"><span class="big">37</span><span>without a manager</span></div></div>';
+  h+='<h2 class="sec-h">Organization roles</h2><div class="card stack"><div><b>Organization admins</b> <span class="muted small">Manage users, all workspaces and settings</span></div><div class="chips">'+I.admins.map(function(a){return pill(esc(a),'acc')}).join('')+'</div>'+
+   '<div class="row wrapr"><input type="email" placeholder="Invite an admin by email" data-bind="id.email" value="'+esc(I.email)+'" aria-label="Admin email" style="max-width:320px"><button class="btn sm" data-a="addadmin">Add admin</button></div>'+errBox('admin')+
+   help('Why two admins?','If the only admin is on leave, nobody can change settings, grant consent or approve changes. Two is the minimum we require to go live.')+'</div>';
+  h+='<h2 class="sec-h">Attribute mapping</h2><div class="list"><table class="tbl"><tr><th>Atomicwork field</th><th>Okta attribute</th><th></th></tr><tr><td>Department</td><td>department</td><td>'+pill('Matched','ok')+'</td></tr><tr><td>Location</td><td>city</td><td>'+pill('Matched','ok')+'</td></tr><tr><td>Manager</td><td>manager</td><td>'+pill('Matched','ok')+'</td></tr><tr><td>Job title</td><td>title</td><td>'+pill('Matched','ok')+'</td></tr></table></div><div class="foot" style="margin-top:12px"><span class="sp"></span>'+(I.mapOk?pill(ico('check')+'Confirmed','ok'):'<button class="btn sm" data-a="mapok">Confirm mapping</button>')+'</div>';
+  h+='<h2 class="sec-h">People without a manager</h2><div class="card stack"><p>37 people have no manager in Okta. Approvals that go to “Reporting manager” would stall for them. Choose who approves instead.</p><div class="row wrapr"><span style="width:200px"><b>Fallback approver</b></span>'+sel('fallback',['Not set','Department head','IT director'],I.fallback||'Not set')+(I.fallback?pill(ico('check')+'Set','ok'):pill('Needed','warn'))+'</div></div>';
+  return h+nav(backBtn(0),'<button class="btn" data-a="step" data-v="2">Test identity</button>');
+ },
+ function(){
+  var u=USERS[S.id.lookup];
+  var ex='<h2 class="sec-h">Check a person</h2><div class="card stack"><div class="seg" role="group" aria-label="Pick a person">'+USERS.map(function(x,i){return '<button class="'+(S.id.lookup===i?'on':'')+'" data-a="lookup" data-v="'+i+'">'+x[0]+'</button>'}).join('')+'</div><div class="grid3"><div><div class="muted small">Team and location</div><b>'+u[1]+'</b></div><div><div class="muted small">Manager</div><b>'+u[2]+'</b></div><div><div class="muted small">Groups</div><b>'+u[3]+'</b></div></div></div>';
+  return testPanel('identity',ex)+nav(backBtn(1),openBtn('knowledge','Continue to Knowledge'));
+ }
+];
+
+/* knowledge */
+SCREENS.knowledge=[
+ function(){
+  var K=S.kn,h='';
+  var cand=KSRC.filter(function(c){return !K.src.some(function(s){return s.id===c.id})});
+  if(!K.src.length)h+='<div class="hint info" style="margin-bottom:14px">'+ico('bulb')+'<span>Start with one source. Atom learns it in a few minutes and relearns every few hours. SharePoint permissions are inherited.</span></div>';
+  h+=K.src.length?'<div class="list">'+K.src.map(function(s){
+   var st=s.status==='Learned'?pill(ico('check')+'Learned','ok'):(s.status==='Processing'?pill('<i class="spin"></i>Processing','warn'):pill('Failed','bad'));
+   var extra='';
+   if(s.status==='Failed')extra='<div class="err" style="margin:0 18px 14px">'+ico('warn')+'<div class="stack" style="gap:8px"><span><b>Atomicwork can’t read this space.</b> The integration user needs access to the “IT” space in Confluence. Add it, then retry.</span><span><button class="btn sm" data-a="retrysrc" data-v="'+s.id+'">I’ve added access. Retry</button></span></div></div>';
+   if(s.hr&&s.aud==='All employees')extra='<div class="hint" style="margin:0 18px 14px">'+ico('warn')+'<div class="stack" style="gap:8px"><span><b>This looks like HR policy content, and it’s visible to all employees.</b> Atom would answer salary band and leave questions for everyone.</span><span><button class="btn sm" data-a="setaud" data-v="'+s.id+'" data-aud="HR workspace only">Restrict to HR workspace</button></span></div></div>';
+   return '<div style="border-bottom:1px solid var(--line)"><div class="li" style="border:0"><span class="tile">'+s.name.charAt(0)+'</span><div class="sp"><div class="t">'+esc(s.name)+'</div><div class="muted small">'+s.n+' items · '+s.type+(s.type==='SharePoint'?' · permissions inherited':'')+'</div></div><div><div class="muted small">Visible to</div><select class="s" data-c="aud" data-v="'+s.id+'" aria-label="Audience for '+esc(s.name)+'">'+AUD.map(function(a){return '<option'+(a===s.aud?' selected':'')+'>'+a+'</option>'}).join('')+'</select></div>'+st+'</div>'+extra+'</div>';
+  }).join('')+'</div>':'';
+  if(cand.length)h+='<h2 class="sec-h" style="margin-top:22px">Add a source</h2><div class="chips">'+cand.map(function(c){return '<button class="chip" data-a="addsrc" data-v="'+c.id+'">+ '+c.name+'</button>'}).join('')+'</div>';
+  h+=help('Why set an audience?','Atom answers from everything it has learned. The audience decides which employees can get answers from a source, so confidential content never becomes a chat answer.');
+  return h+nav('','<button class="btn" data-a="step" data-v="2">Test coverage</button>');
+ },
+ function(){
+  var K=S.kn;
+  var h='<p class="muted" style="margin-bottom:12px">Verified answers are exact responses for questions with one correct answer. Atom uses them before anything else.</p><div class="list">'+K.verified.map(function(v,i){return '<div class="li"><div class="sp"><div class="t">'+esc(v.q)+'</div><div class="muted">'+esc(v.a)+'</div></div><button class="btn sec sm" data-a="delver" data-v="'+i+'">Remove</button></div>'}).join('')+'</div>';
+  h+='<h2 class="sec-h">Add a verified answer</h2><div class="card stack"><div><label class="f" for="vq">Question</label><input id="vq" type="text" data-bind="kn.vq" value="'+esc(K.vq)+'"></div><div><label class="f" for="va">Answer</label><textarea id="va" data-bind="kn.va" style="min-height:70px">'+esc(K.va)+'</textarea></div>'+errBox('ver')+'<div><button class="btn" data-a="addver">Add verified answer</button></div></div>';
+  return h+nav(backBtn(0),'');
+ },
+ function(){
+  var K=S.kn.fixed;
+  var h='';
+  if(S.kn.edit){
+   var k=S.kn.edit,t=TPL[k];if(!S.kn.body)S.kn.body=t.b;
+   return '<div class="card stack"><div class="hint">'+ico('bulb')+'<span>Drafted from your SharePoint policy pages and your Okta app catalog. Edit anything before publishing.</span></div><div><label class="f" for="kt">Article title</label><input id="kt" type="text" value="'+esc(t.t)+'"></div><div><label class="f" for="kb">Steps</label><textarea id="kb" data-bind="kn.body">'+esc(S.kn.body)+'</textarea></div>'+errBox('art')+'</div>'+nav('<button class="btn sec" data-a="canceledit">Cancel</button>','<button class="btn" data-a="publishkb">Publish article</button>');
+  }
+  if(!learned().length)h+='<div class="hint" style="margin-bottom:14px">'+ico('warn')+'<span>No learned sources yet, so there’s nothing to test. <button class="link" data-a="step" data-v="0">Add a source</button></span></div>';
+  else{
+   var rows=[['How do I connect to the VPN?','IT guides, VPN setup','ans',null],['How do I reset my password?','Okta help page','ans',null],['How do I join the office Wi-Fi?','Network guide','ans',null],['How do I get a new laptop?',K.laptop?'Published just now':'Policy found, no steps',K.laptop?'ans':'part','laptop'],['How do I book a meeting room?',K.room?'Published just now':'Facilities page, outdated',K.room?'ans':'part','room'],['How do I request Salesforce access?',K.sf?'Published just now':'No content found',K.sf?'ans':'gap','sf']];
+   var P2={ans:pill('Answered','ok'),part:pill('Partial','warn'),gap:pill('Gap','bad')};
+   h+='<div class="grid3"><div class="stile ok"><span class="big">'+answered()+'</span><span>Answered</span></div><div class="stile warn"><span class="big">'+partial()+'</span><span>Partial</span></div><div class="stile bad"><span class="big">'+gap()+'</span><span>Gap</span></div></div><p class="muted" style="margin:12px 0">Tested against 10 common questions from your own ticket categories. Atom answers the same way in every workspace.</p><div class="list">'+rows.map(function(r){
+    var act=r[3]&&r[2]!=='ans'?'<button class="btn sm" data-a="fix" data-v="'+r[3]+'">'+(r[2]==='gap'?'Add from template':'Add steps')+'</button>':'';
+    return '<div class="li"><span class="sp t" style="font-weight:500">'+r[0]+'</span><span class="muted small">'+r[1]+'</span>'+act+P2[r[2]]+'</div>';
+   }).join('')+'<div class="li muted small">Plus 4 more questions answered from your IT guides.</div></div><div style="height:22px"></div>';
+  }
+  return h+testPanel('knowledge')+nav(backBtn(1),openBtn('channels','Continue to Channels'));
+ }
+];
+
+/* channels */
+SCREENS.channels=[
+ function(){
+  var C=S.ch;
+  var st=C.teams?pill(ico('check')+'Connected','ok'):(C.busy.teams?pill('<i class="spin"></i>Connecting','warn'):'<button class="btn" data-a="connectteams">Connect</button>');
+  var panel='';
+  if(!C.teams&&C.consent==='needed')panel='<div class="hint" style="margin:0 18px 14px">'+ico('lock')+'<div class="stack" style="gap:10px"><span><b>Teams needs Microsoft admin consent.</b> Consent lets the Atom app read messages sent to it and reply. It doesn’t read other conversations.</span><span class="row wrapr"><button class="btn sm" data-a="grant">I’m a global admin: grant consent</button><button class="btn sec sm" data-a="showinvite">Invite a teammate</button></span></div></div>';
+  if(!C.teams&&C.consent==='invite')panel='<div class="hint" style="margin:0 18px 14px">'+ico('lock')+'<div class="stack" style="gap:10px;flex:1"><span><b>Invite a global admin.</b> They get a link that only grants consent for Teams.</span><span class="row"><input type="email" placeholder="name@northwind.com" data-bind="ch.email" value="'+esc(C.email)+'" aria-label="Teammate email"><button class="btn sm" data-a="sendinvite">Send invite</button><button class="link" data-a="backconsent">Back</button></span>'+errBox('inv')+'</div></div>';
+  if(!C.teams&&C.consent==='invited')panel='<div class="hint ok" style="margin:0 18px 14px">'+ico('check')+'<div class="stack" style="gap:10px"><span><b>Invite sent to '+esc(C.email)+'.</b> Setup continues when they approve. You can keep going with other modules.</span><button class="btn sec sm" data-a="approve">Demo: simulate teammate approving</button></div></div>';
+  var slk=C.slack?pill(ico('check')+'Connected','ok'):'<button class="btn sec" data-a="connectslack">Connect</button>';
+  var h='<div class="list"><div style="border-bottom:1px solid var(--line)"><div class="li" style="border:0"><span class="tile">T</span><div class="sp"><div class="t">Microsoft Teams '+pill('Detected','acc')+'</div><div class="muted">Employees reach Atom in DMs or by @mention</div></div>'+st+'</div>'+panel+'</div>'+
+   '<div class="li"><span class="tile">S</span><div class="sp"><div class="t">Slack</div><div class="muted">Optional. Supports a custom-branded app</div></div>'+slk+'</div></div>';
+  if(C.teams){
+   h+='<h2 class="sec-h">How employees can reach Atom</h2><div class="card stack"><div>'+tg('dm',C.dm,'Direct messages')+'</div><div>'+tg('mention',C.mention,'@mention in channels')+'</div><div class="row wrapr"><span style="width:200px">Allowed channels</span>'+sel('chscope',['All channels','Selected channels only'],C.scope)+'</div><div>'+tg('pinned',C.pinned,'I’ve pinned the Atom app for the pilot group in the Teams app setup policy')+help('Why pin it?','Teams only shows the app to people who’ve been allowed it. Pinning it for the pilot group means they see Atom in their sidebar without installing anything.')+'</div></div>';
+   h+='<details class="cust"><summary>Customise: email and portal</summary><div class="card stack" style="margin-top:10px"><div>'+tg('fwd',C.fwd,'I’ve forwarded support@northwind.com to my Atomicwork address')+'</div><div>'+tg('domain',C.domain,'Use a custom portal domain (help.northwind.com)')+'</div></div></details>';
+  }
+  return h+nav('','<button class="btn" data-a="step" data-v="1" '+((C.teams||C.slack)?'':'disabled')+'>Test the channel</button>');
+ },
+ function(){
+  var C=S.ch,ch=C.teams?'Microsoft Teams':(C.slack?'Slack':null);
+  if(!ch)return '<div class="hint">'+ico('warn')+'<span>Connect a channel first. <button class="link" data-a="step" data-v="0">Go to Connect</button></span></div>';
+  var ex='<div class="card stack" style="margin-bottom:16px"><div class="row wrapr"><div class="sp"><b>Send a test message in '+ch+'</b><div class="muted">Atom sends one message to you, the admin, so you can confirm employees will see it.</div></div><button class="btn" data-a="chtest" '+(C.sent?'disabled':'')+'>'+(C.sent?'Sent':'Send test message')+'</button></div>'+(C.sent?'<div class="msg-teams"><div class="muted small">Atom in '+ch+'</div><div style="margin:4px 0">'+esc(S.atom.greet)+'</div>'+pill(ico('check')+'Delivered just now','ok')+'</div>':'')+'</div>';
+  return ex+testPanel('channels')+nav(backBtn(0),openBtn('atom','Continue to Atom'));
+ }
+];
+
+/* atom */
+function reply(txt){
+ var x=txt.toLowerCase(),w=W();
+ if(S.await==='role'){S.await=null;return{t:'Done. Request REQ-1042 is created for Salesforce ('+txt+'). Next: your manager approves, then Security.',tr:{u:'Role selection',m:'Service: Software access',r:'Manager approval, then Security approval',c:'High'}}}
+ var esw=S.w[S.atom.escalate];
+ var app=w.apps.filter(function(a){return x.indexOf(a.n.toLowerCase().split(' ')[0])>-1})[0];
+ if(app){
+  var sw=svcOf(w,'sw');
+  if(!sw||!sw.pub)return{t:'I can’t offer app access yet. Software access isn’t published, so I’ve handed this to the '+esw.name+' service desk.',tr:{u:'Software access request',m:'No published service',r:'Escalate to the '+esw.name+' service desk',c:'Low'}};
+  var pol=app.pol==='Pre-approved'?'No approval needed. I’ll grant it and tell you when it’s done.':(app.pol==='Manager'?'It needs your manager’s approval.':'It needs your manager’s approval, then Security’s.');
+  if(/salesforce/.test(x)){S.await='role';return{t:'Sure. Which role do you need?',chips:['Sales user','Admin'],tr:{u:'Software access request',m:'Access policy: '+app.n,r:app.pol==='Manager + Security'?'Manager, then Security approval':'Manager approval',c:'High'}}}
+  return{t:app.n+' is '+app.risk.toLowerCase()+' risk. '+pol,tr:{u:'Software access request',m:'Access policy: '+app.n,r:app.pol==='Pre-approved'?'Grant directly':'Approval, then provision',c:'High'}};
+ }
+ if(!learned().length&&/vpn|password|laptop|wifi|wi-fi/.test(x))return{t:'I don’t have any knowledge sources yet, so I can’t answer that. I’ve handed it to the '+esw.name+' service desk.',tr:{u:'Knowledge question',m:'No learned sources',r:'Escalate',c:'Low'}};
+ if(/vpn/.test(x))return{t:'Install GlobalProtect from Software Center, then sign in with your Northwind SSO.',tr:{u:'Knowledge question',m:'Verified answer: VPN',r:'Answer from knowledge',c:'High'}};
+ if(/password|reset/.test(x))return{t:'Use the self-service reset at the Okta sign-in page. Choose Forgot password and follow the prompts.',tr:{u:'Knowledge question',m:'Okta help page',r:'Answer from knowledge',c:'High'}};
+ if(/laptop|computer/.test(x))return S.kn.fixed.laptop?{t:'Ask for a new laptop and choose standard or developer. Your manager approves, then IT ships it.',tr:{u:'Knowledge question',m:'Published article: new laptop',r:'Answer from knowledge',c:'High'}}:{t:'I found the laptop policy but not the steps. I can raise a request for you.',tr:{u:'Hardware request',m:'Policy page, no steps',r:'Offer to create a ticket',c:'Medium'}};
+ return{t:'I couldn’t find an answer, so I handed this to the '+esw.name+' service desk. An agent will reply here.',tr:{u:'Unknown topic',m:'No match in knowledge or services',r:'Escalate to the '+esw.name+' service desk',c:'Low'}};
+}
+function send(txt){
+ txt=String(txt||'').trim();if(!txt)return;
+ S.chat.push({w:'u',t:txt});var r=reply(txt);S.chat.push({w:'a',t:r.t,chips:r.chips});S.trace=r.tr;S.focus=true;render();
+ var m=$('.msgs');if(m)m.scrollTop=m.scrollHeight;
+}
+SCREENS.atom=[
+ function(){
+  var A=S.atom,created=WSL.filter(function(x){return S.w[x[0]].created});
+  var h='<div class="hint info" style="margin-bottom:16px">'+ico('bulb')+'<span>Atom is domain agnostic: one configuration answers for IT, HR, Finance and Facilities. Workspace behaviour lives in Service management, Workflows and AI coworkers.</span></div>'+
+   pre('routing by intent, cite sources, answer only from learned knowledge, escalate to the IT service desk.','Atomicwork recommended settings for a company your size')+
+   '<div class="card stack"><div><b>How should requests be routed to workspaces?</b></div>'+
+   [['intent','Atom routes by intent (recommended)','Atom reads the request and picks the workspace. Best once you have more than one workspace.'],['primary','Everything to a primary workspace','Simple. Every request lands in one place.'],['choose','Employee chooses the workspace','Employees pick from a list. More clicks, fewer surprises.']].map(function(o){return '<label class="tg" style="align-items:flex-start"><input type="radio" name="route" data-c="route" value="'+o[0]+'" '+(A.route===o[0]?'checked':'')+'><span><b>'+o[1]+'</b><div class="muted small">'+o[2]+'</div></span></label>'}).join('')+
+   (A.route==='primary'?'<div class="row wrapr"><span>Primary workspace</span>'+sel('primary',created.map(function(x){return S.w[x[0]].name}),S.w[A.primary].name)+'</div>':'')+'</div>'+
+   '<div class="card stack" style="margin-top:14px"><b>Answer rules</b><div>'+tg('cite',A.cite,'Cite the source in every answer')+'</div><div>'+tg('only',A.only,'Answer only from learned knowledge')+help('Why only learned knowledge?','When this is off, Atom may answer from general model knowledge. That can sound right but be wrong for your company, so it’s on by default.')+'</div><div>'+tg('clarify',A.clarify,'Ask a clarifying question before creating a ticket')+'</div></div>'+
+   '<div class="card stack" style="margin-top:14px"><b>When Atom can’t resolve something</b><div class="row wrapr"><span style="width:240px">Offer to raise a request in</span>'+sel('escalate',created.map(function(x){return S.w[x[0]].name}),S.w[A.escalate].name)+'</div></div>'+
+   '<details class="cust"><summary>Customise: greeting and language</summary><div class="card stack" style="margin-top:10px"><div><label class="f" for="gr">Greeting</label><input id="gr" type="text" data-bind="atom.greet" data-rerender="1" value="'+esc(A.greet)+'"></div>'+errBox('greet')+'<div class="row wrapr"><span style="width:240px">Language</span>'+sel('lang',['English','German','French','Spanish','Japanese'],A.lang)+'</div></div></details>';
+  return h+nav('','<button class="btn" data-a="step" data-v="3">Run the Atom scenarios</button>');
+ },
+ function(){
+  var A=S.atom;
+  var h='<p class="muted" style="margin-bottom:12px">Skills are ready-made capabilities Atom can run for employees. Each needs its system connected.</p><div class="list">'+SKILLS.map(function(s){
+   var avail=s[3]==='okta'?S.id.okta:false,on=A.skills[s[0]];
+   return '<div class="li"><span class="tile">'+s[1].charAt(0)+'</span><div class="sp"><div class="t">'+s[1]+'</div><div class="muted">'+s[2]+'</div>'+(avail?'':'<div class="muted small" style="margin-top:4px">'+ico('lock')+' Needs '+(s[3]==='okta'?'Okta connected':'Intune connected')+'</div>')+'</div>'+(avail?tg('skill',on,on?'On':'Off','data-v="'+s[0]+'"'):pill('Unavailable'))+'</div>';
+  }).join('')+'</div>';
+  return h+nav(backBtn(0),'<button class="btn" data-a="step" data-v="2">Try Atom</button>');
+ },
+ function(){
+  var msgs=S.chat.length?S.chat.map(function(m,i){var isLast=i===S.chat.length-1;
+   return '<div class="b '+m.w+'">'+esc(m.t)+(m.chips&&isLast&&S.await?'<div class="chips" style="margin-top:8px">'+m.chips.map(function(c){return '<button class="chip" data-a="chat" data-v="'+c+'">'+c+'</button>'}).join('')+'</div>':'')+'</div>';}).join(''):'<p class="muted">Pick a question below, or type your own. Try “I need access to Salesforce”.</p>';
+  var tr=S.trace?'<dl class="trace" style="margin:0"><dt>Understood</dt><dd>'+S.trace.u+'</dd><dt>Matched</dt><dd>'+S.trace.m+'</dd><dt>Will run</dt><dd>'+S.trace.r+'</dd><dt>Confidence</dt><dd>'+S.trace.c+'</dd></dl>':'<p class="muted small">Send a message to see what Atom understood and what it would run.</p>';
+  return '<div class="row wrapr" style="margin-bottom:14px"><label for="per" class="f" style="margin:0">Test as</label><select id="per" data-c="persona" style="width:auto">'+['Priya · Engineering','Marco · Sales','Aisha · Finance'].map(function(p){return '<option'+(S.persona===p?' selected':'')+'>'+p+'</option>'}).join('')+'</select><span class="muted small">Answers respect each person’s permissions.</span></div>'+
+   '<div class="chat"><div class="card stack"><div class="msgs" aria-live="polite">'+msgs+'</div><div class="chips">'+['How do I connect to the VPN?','I need access to Salesforce','Can I get Figma?','How do I get a new laptop?'].map(function(q){return '<button class="chip" data-a="chat" data-v="'+q+'">'+q+'</button>'}).join('')+'</div>'+
+   '<div class="row"><input id="cin" type="text" placeholder="Message Atom as '+esc(S.persona.split(' ')[0])+'" aria-label="Message Atom"><button class="btn" data-a="chatsend">Send</button></div></div><div class="card tint"><b style="color:var(--accent-ink)">Behind the scenes</b>'+tr+'</div></div>'+nav(backBtn(1),'<button class="btn" data-a="step" data-v="3">Run the scenarios</button>');
+ },
+ function(){
+  var A=S.atom,w=W();
+  var g='<h2 class="sec-h">Your own test questions</h2><p class="muted" style="margin-bottom:10px">Add the questions your company really asks, with the answer you expect. Atom is checked against them each time you run the suite.</p>'+(A.golden.length?'<div class="list">'+A.golden.map(function(q,i){
+   var r=q.res,st=!r?pill('Not run'):(r.ver!==S.ver?pill('Out of date','warn'):(r.ok?pill(ico('check')+'Passed','ok'):pill('Failed','bad')));
+   var body=(r&&r.ver===S.ver&&!r.ok)?'<div class="err" style="margin-top:8px">'+ico('warn')+'<div class="stack" style="gap:8px"><span><b>What went wrong:</b> '+esc(r.reason)+'</span><span>'+fixBtn(r.fix)+'</span></div></div>':'';
+   return '<div style="border-bottom:1px solid var(--line)"><div class="li" style="border:0"><div class="sp"><div class="t">'+esc(q.q)+'</div><div class="muted small">Expected: '+esc(q.e)+'</div>'+body+'</div>'+st+'<button class="btn sec sm" data-a="rungold" data-v="'+i+'">Run</button><button class="btn sec sm" data-a="delgold" data-v="'+i+'">Remove</button></div></div>';}).join('')+'</div>':'')+
+   '<div class="card stack" style="margin-top:12px"><div><label class="f" for="gq">Question</label><input id="gq" type="text" data-bind="atom.gq" value="'+esc(A.gq)+'" placeholder="Why was Project Atlas delayed?"></div><div><label class="f" for="ge">Expected answer</label><input id="ge" type="text" data-bind="atom.ge" value="'+esc(A.ge)+'" placeholder="The design phase slipped two weeks after a vendor review"></div>'+errBox('gold')+'<div><button class="btn" data-a="addgold">Add question</button></div></div>';
+  return testPanel('atom',g)+nav(backBtn(2),openBtn('service','Continue to Service management'));
+ }
+];
+
+/* workflows */
+function chainFor(app,noSim){
+ var w=W(),a=w.apps.filter(function(x){return x.n===app})[0],sm=w.sm;
+ var skipSec=a&&a.pol!=='Manager + Security',skipMgr=a&&a.pol==='Pre-approved';
+ var nodes=['Employee request','Manager approval','Security approval','Provision in '+w.wf.main.prov.split(' ')[0],'Notify employee'];
+ return '<div class="flow">'+nodes.map(function(n,i){
+  var skipped=(i===1&&skipMgr)||(i===2&&skipSec),s='';
+  var simv=noSim?null:sm.sim;
+  if(simv==null||i>simv)s=skipped?'skip':'';else if(skipped)s='skip';else if(i===simv&&sm.simRun)s='act';else s='done';
+  return (i?'<span class="arr" aria-hidden="true">&rarr;</span>':'')+'<div class="node '+s+'">'+n+(s==='skip'?'<div class="small" style="font-weight:500;text-decoration:none">Not required</div>':'')+'</div>';
+ }).join('')+'</div>';
+}
+SCREENS.workflows=[
+ function(){
+  var w=W(),m=w.wf.main,p1=w.wf.p1,svc=svcOf(w,m.svc);
+  var h='<div class="card stack"><div class="row wrapr"><div class="sp"><h3>'+esc(m.name)+'</h3><div class="muted small">Service request · Trigger: a request for “'+esc(svc?svc.n:'')+'” is created</div></div>'+pill(m.status,m.status==='Published'?'ok':'warn')+'</div>'+
+   '<ol style="margin:0;padding-left:20px;line-height:2"><li>Send for approval to <span class="row wrapr" style="display:inline-flex">'+sel('approver',['Reporting manager','App owner','Department head'],m.approver)+'</span></li>'+
+   (w.apps.length?'<li>If the app’s access policy needs it, send for approval to <b>Security team</b></li>':'')+
+   '<li>Provision access by <span style="display:inline-flex">'+sel('prov',['Okta group assignment','Manual task'],m.prov)+'</span></li><li>Notify the requester when approved</li><li>'+tg('notifyDecline',m.notifyDecline,'Notify the requester if declined')+'</li></ol>'+
+   errBox('wf')+'<div class="cust" style="margin-top:0"><details><summary>Customise: reminders and escalation</summary><div style="margin-top:10px">'+tg('remind',m.remind,'Remind approvers after 24 hours, escalate to their manager after 48')+help('Why this matters','Without it, a request waits forever if an approver is away. Over-automating approvals risks important requests being overlooked, so this reminds people rather than auto-approving.')+'</div></details></div>'+
+   '<div class="row wrapr"><button class="btn sec" data-a="step" data-v="2">Test before publishing</button><span class="sp"></span>'+(m.status==='Published'?'<button class="btn sec" data-a="unpubwf">Unpublish</button>':'<button class="btn" data-a="publishwf">Validate and publish</button>')+'</div></div>';
+  h+='<div class="card stack" style="margin-top:14px"><div class="row wrapr"><div class="sp"><h3>P1 incident notification</h3><div class="muted small">Incident · Trigger: priority is set to P1</div></div>'+pill(p1.status,p1.status==='Published'?'ok':'warn')+'</div><p>Notify the on-call group in Teams channel #it-oncall and add a private note with the affected service.</p>'+errBox('p1')+'<div><button class="btn sec" data-a="pubp1">'+(p1.status==='Published'?'Unpublish':'Validate and publish')+'</button></div></div>';
+  h+='<h2 class="sec-h">Describe a new workflow</h2><div class="card stack"><p class="muted">Admin Assist builds a draft from plain English. You review it before anything is published.</p><textarea data-bind="w.'+S.cur+'.wf.ai" style="min-height:70px" placeholder="When a new hire is added, create onboarding tasks for IT and notify the manager">'+esc(w.wf.ai)+'</textarea>'+errBox('ai')+'<div><button class="btn sec" data-a="buildai">Build with AI</button></div>'+
+   w.wf.extra.map(function(x){return '<div class="hint info">'+ico('bulb')+'<div><b>Draft: '+esc(x.name)+'</b><ol style="margin:4px 0 0;padding-left:18px">'+x.steps.map(function(s){return '<li>'+esc(s)+'</li>'}).join('')+'</ol></div></div>'}).join('')+'</div>';
+  return h;
+ },
+ function(){
+  var w=W();
+  if(!w.apps.length)return '<div class="hint info">'+ico('bulb')+'<span>This workspace doesn’t manage app access. Access policies are set up in the IT workspace.</span></div>';
+  var h=pre('38 apps found in your Okta catalog. Risk levels are suggested from each app’s admin permissions and the data it holds. The policies below are how access works today: high-risk apps need only a manager. Use “Accept suggested policies” to require Security for them.','Okta app catalog')+
+   '<div class="list"><table class="tbl"><tr><th>App</th><th>Risk</th><th>Who approves</th><th>Provisioned by</th></tr>'+w.apps.map(function(a,i){
+    return '<tr><td><b>'+a.n+'</b><div class="muted small">Owner: '+a.owner+'</div></td><td>'+sel('apprisk',['Low','Medium','High'],a.risk,'data-v="'+i+'"')+'</td><td>'+sel('apppol',POLS,a.pol,'data-v="'+i+'"')+(S.err['app'+i]?'<div class="err">'+ico('warn')+'<span>'+S.err['app'+i]+'</span></div>':'')+'</td><td>'+a.prov+'</td></tr>';
+   }).join('')+'</table></div>'+help('How do approval policies work?','Pre-approved: access is granted straight away and the manager is told. Manager: the requester’s manager approves. Manager + Security: both approve in order. High-risk apps can’t be set to less than Manager + Security.');
+  return h+nav('<button class="link" data-a="acceptapps">Accept suggested policies</button>',w.appsOk?pill(ico('check')+'Reviewed','ok'):'<button class="btn" data-a="confirmapps">Confirm policies</button>');
+ },
+ function(){
+  var w=W(),sm=w.sm,apps=w.apps.length?w.apps:[{n:'(none)'}];
+  var ex='<h2 class="sec-h">Simulate a request</h2><div class="row wrapr" style="margin-bottom:14px">'+(w.apps.length?sel('simapp',w.apps.map(function(a){return a.n}),sm.app):'')+'<button class="btn" data-a="simulate" '+(sm.simRun?'disabled':'')+'>Run simulation</button></div><div class="card">'+chainFor(sm.app,false)+'</div>';
+  return (w.wf.main.status==='Published'?'':'<div class="hint" style="margin-bottom:16px">'+ico('lock')+'<span>You’re testing a draft. Nothing reaches employees until you publish.</span></div>')+testPanel('workflows',ex)+nav(backBtn(1),openBtn('coworker','Continue to AI coworkers'));
+ }
+];
+
+/* coworkers */
+var TOOLCAPS=[['Okta',[['okta_read','Read users and groups',0],['okta_reset','Reset a password',0],['okta_assign','Assign an app',0],['okta_deactivate','Deactivate a user',1]]],['Atomicwork request tool',[['atom_pub','Add a public note',0],['atom_priv','Add a private note',0],['atom_status','Update status',0],['atom_reassign','Reassign',0]]]];
+SCREENS.coworker=[
+ function(){
+  var w=W(),c=w.cw,sel_=cwRow(w,c.sel)||c.roster[0];
+  var h='<p class="muted" style="margin-bottom:12px">Each coworker is a specialist with a goal, tools and boundaries. Seeded coworkers are pre-tuned, so spend your time on the Goal and the tools.</p><div class="list">'+c.roster.map(function(r){
+   return '<div class="li"><span class="tile">'+r.n.charAt(0)+'</span><div class="sp"><div class="t">'+r.n+' '+pill(r.kind,'acc')+'</div><div class="muted">'+r.note+'</div></div>'+(r.id===c.sel?pill('Editing'):'<button class="btn sec sm" data-a="selcw" data-v="'+r.id+'">Edit</button>')+tg('cwon',r.on,r.on?'On':'Off','data-v="'+r.id+'"')+'</div>';
+  }).join('')+'</div>'+errBox('cw');
+  if(sel_.id==='access'){
+   var g=c.goal;
+   h+='<h2 class="sec-h">'+sel_.n+'</h2><div class="card stack"><b>Goal</b><div class="muted small">What it handles, how, what it must refuse, and how it finishes.</div>'+
+    '<div><b class="small">Decision framework</b><div class="chips" style="margin-top:6px">'+['Grant access','Revoke access','Check entitlements'].map(function(x){return pill(x,'acc')}).join('')+pill('Out of scope: hand off')+'</div></div>'+
+    '<div><b class="small">Boundaries</b><div style="margin-top:6px">'+tg('verify',g.verify,'Verify the requester’s identity before any change')+'</div><div>'+tg('adminEscalate',g.adminEscalate,'Escalate requests for admin roles to a human')+'</div><div>'+tg('humanDestructive',g.humanDestructive,'Require human approval for destructive actions')+'</div></div>'+
+    '<div><b class="small">End of run</b><div class="row wrapr" style="margin-top:6px"><span>Close the ticket as</span>'+sel('endstatus',['Resolved','In progress','Escalate to manager'],g.end)+'</div><div>'+tg('note',g.note,'Post a public note summarising what was done')+help('Why this matters','If this is off, the ticket can be marked Resolved with no message to the requester. They’d have to ask what happened.')+'</div></div></div>';
+   h+='<div class="card stack" style="margin-top:14px"><b>Tools</b>'+TOOLCAPS.map(function(t){return '<div><div class="small muted" style="font-weight:700">'+t[0]+(t[0]==='Okta'?(S.id.okta?'':' (not connected)'):'')+'</div>'+t[1].map(function(cp){return '<div>'+tg('tool',c.tools[cp[0]],cp[2]?'<b>'+cp[1]+'</b> '+pill('Destructive','bad'):cp[1],'data-v="'+cp[0]+'"')+'</div>'}).join('')+'</div>'}).join('')+help('Why capabilities?','You enable only what the specialist needs. Read and diagnostic actions are low risk. Destructive actions like deactivating a user stay off unless a human approves each one.')+'</div>';
+   h+='<div class="card stack" style="margin-top:14px"><b>Mode and budget</b><div class="row wrapr"><span style="width:160px">Mode</span><div class="seg"><button class="on" disabled>Supervised</button><button disabled title="Unlocks after 14 days and 20 reviewed actions">Autonomous (locked)</button></div></div><div class="muted small">Supervised: an agent reviews each action before it runs. Autonomous unlocks after 14 days and 20 reviewed actions.</div><div class="row wrapr"><span style="width:160px">Monthly budget</span>'+sel('budget',['$50 per month','$150 per month','$300 per month'],c.budget)+'</div><div class="muted small">Every action is written to an audit trail. This can’t be turned off.</div></div>';
+  }
+  return h+nav('','<button class="btn" data-a="step" data-v="1">Test the coworker</button>');
+ },
+ function(){
+  var w=W();
+  if(!cwOn(w,'access'))return '<div class="hint info" style="margin-bottom:16px">'+ico('bulb')+'<span>Enable the Access Management specialist to generate coworker scenarios. They’re not required to go live.</span></div>'+testPanel('coworker')+nav(backBtn(0),'');
+  var ex='<h2 class="sec-h">Run a sample request</h2><div class="card stack"><p>“Please reset the password for Priya Nair, she’s locked out.”</p><div><button class="btn sec" data-a="cwrun">Run on this request</button></div>'+
+   (w.cw.run?'<ul class="tl"><li>'+ico('check')+'<span>Triage read the request and chose <b>Access Management specialist</b></span></li><li>'+ico('check')+'<span>Verified Priya’s identity in Okta'+(w.cw.goal.verify?'':' (skipped: boundary is off)')+'</span></li><li>'+ico('check')+'<span>Reset the password, held for agent review (supervised)</span></li><li>'+ico(w.cw.goal.note?'check':'warn')+'<span>'+(w.cw.goal.note?'Posted a public note to Priya':'<b>Closed the ticket as '+w.cw.goal.end+' with no message to Priya.</b>')+'</span></li></ul>':'')+'</div>';
+  return testPanel('coworker',ex)+nav(backBtn(0),openBtn('golive','Continue to go-live'));
+ }
+];
+
+/* service management */
+function slaIdx(v){return RES.indexOf(v)}
+SCREENS.service=[
+ function(){
+  var w=W(),T_=[['sr','Service requests','Standard requests such as software or equipment.'],['inc','Incidents','Something is broken or degraded.'],['prob','Problems','The root cause behind recurring incidents.'],['chg','Changes','Controlled changes to systems.']];
+  var h=pre((w.kind==='it'?'all four request types, which we recommend for IT teams':'service requests and incidents, a lighter setup for non-IT teams')+'. Default statuses (Open, Pending, Waiting for approval, Waiting on vendor, Resolved, Closed, Cancelled) and priorities P1 to P4.','the team type you chose')+
+   '<div class="list">'+T_.map(function(t){return '<div class="li"><div class="sp"><div class="t">'+t[1]+'</div><div class="muted">'+t[2]+'</div></div>'+tg('rtype',w.types[t[0]],w.types[t[0]]?'Enabled':'Off','data-v="'+t[0]+'"')+'</div>'}).join('')+'</div>'+errBox('types')+
+   '<details class="cust"><summary>Customise: statuses, priorities and categories</summary><div class="card stack" style="margin-top:10px"><div><b>Categories</b><div class="chips" style="margin-top:6px">'+['Access','Software','Hardware','Network','Accounts'].map(function(x){return pill(x)}).join('')+'</div></div><div class="muted small">Add sub-categories such as Network: Outages, Firewall issues. Keep statuses consistent across workspaces.</div></div></details>';
+  return h+nav('',w.typesOk?pill(ico('check')+'Confirmed','ok'):'<button class="btn" data-a="oktypes">Confirm request types</button>');
+ },
+ function(){
+  var w=W();
+  var h=pre('agent groups from your directory, round robin assignment, '+w.groups.reduce(function(a,g){return a+g.agents},0)+' agents.','your Okta groups')+
+   '<div class="list"><table class="tbl"><tr><th>Group</th><th>Access</th><th>Assignment</th><th>Agents</th></tr>'+w.groups.map(function(g,i){
+    return '<tr><td><b>'+g.n+'</b><div class="muted small">'+g.src+'</div></td><td>'+sel('gaccess',['Open','Restricted','Private'],g.access,'data-v="'+i+'"')+'</td><td>'+sel('gassign',['Round robin','Load based','Manual'],g.assign,'data-v="'+i+'"')+'</td><td>'+g.agents+(g.away?' <span class="muted small">('+g.away+' away)</span>':'')+'</td></tr>';
+   }).join('')+'</table></div>'+errBox('groups')+help('Open, Restricted or Private?','Open: every agent in the workspace can see and work on the requests. Restricted: only group members can edit, other agents can view and add private comments. Private: only group members can see the requests at all. Use it for sensitive queues.')+help('Which assignment method?','Round robin gives work in turn and skips agents marked away. Load based favours agents with fewer open tickets. Manual leaves tickets unassigned until someone picks them up.');
+  return h+nav(backBtn(0),w.groupsOk?pill(ico('check')+'Confirmed','ok'):'<button class="btn" data-a="okgroups">Confirm agent groups</button>');
+ },
+ function(){
+  var w=W(),h_=w.hours;
+  var h=pre('business hours and time zone read from your Microsoft 365 tenant. SLAs sized for a team like yours.','your Microsoft 365 tenant and common ITSM practice')+
+   '<div class="card stack"><b>Business hours</b><div class="row wrapr"><span style="width:140px">Time zone</span>'+sel('tz',['Asia/Kolkata (IST)','Europe/London (GMT)','America/New_York (ET)'],h_.tz)+'<span style="width:60px;text-align:right">Days</span>'+sel('days',['Mon–Fri','Mon–Sat','Every day'],h_.days)+'</div><div class="row wrapr"><span style="width:140px">Hours</span>'+sel('hstart',['07:00','08:00','09:00','10:00'],h_.start)+' to '+sel('hend',['16:00','17:00','18:00','20:00'],h_.end)+'<span style="width:80px;text-align:right">Holidays</span>'+sel('hol',['India 2026','UK 2026','US 2026','None'],h_.hol)+'</div>'+errBox('hours')+'</div>'+
+   '<h2 class="sec-h">SLA policies</h2><div class="list"><table class="tbl"><tr><th>Policy</th><th>Respond within</th><th>Resolve within</th><th>Pause while</th></tr>'+w.slas.map(function(s,i){
+    return '<tr><td><b>'+s.n+'</b><div class="muted small">'+s.cond+'</div></td><td>'+sel('slaresp',RES,s.resp,'data-v="'+i+'"')+'</td><td>'+sel('slares',RES,s.res,'data-v="'+i+'"')+'</td><td><div class="chips" style="gap:6px">'+PAUSE.map(function(p){var on=s.pause.indexOf(p)>-1;return '<button class="chip '+(on?'on':'')+'" style="padding:3px 10px;font-size:14px" aria-pressed="'+on+'" data-a="slapause" data-v="'+i+'" data-p="'+p+'">'+p+'</button>'}).join('')+'</div></td></tr>';
+   }).join('')+'</table></div>'+errBox('sla')+help('How do pauses work?','When a ticket moves to a paused status, the clock stops. The due time shifts by the time spent paused, so waiting on a vendor doesn’t cause a false breach.');
+  return h+nav(backBtn(1),(w.hoursOk&&w.slasOk)?pill(ico('check')+'Confirmed','ok'):'<button class="btn" data-a="okhs">Confirm hours and SLAs</button>');
+ },
+ function(){
+  var w=W();
+  var h='<div class="hint info" style="margin-bottom:14px">'+ico('bulb')+'<span>Atom can only offer <b>published</b> services. Starter services are drafted for you. Review the fields, then publish.</span></div><div class="list">'+w.svc.map(function(s,i){
+   return '<div class="li"><div class="sp"><div class="t">'+s.n+'</div><div class="muted small">Category: '+s.cat+' · '+s.fields+' fields'+(w.kind==='it'&&s.id==='sw'?' · approval by the workflow':'')+'</div></div>'+tg('pubsvc',s.pub,s.pub?'Published':'Draft','data-v="'+i+'"')+'</div>';
+  }).join('')+'</div>'+errBox('svc')+
+   '<div class="card stack" style="margin-top:14px"><div>'+tg('csat',w.csat,'Send a satisfaction survey when a request is resolved')+'</div></div>';
+  return h+nav(backBtn(2),'<button class="btn" data-a="pubsall">Publish all starter services</button>');
+ },
+ function(){
+  var w=W(),sm=w.sm,TK=[['VPN not connecting','Network','P3'],['Salesforce access request','Access','P2'],['Laptop screen cracked','Hardware','P3']],t=TK[sm.ticket];
+  var ex='<h2 class="sec-h">Try a ticket</h2><div class="row wrapr" style="margin-bottom:14px"><div class="seg" role="group" aria-label="Sample ticket">'+TK.map(function(x,i){return '<button class="'+(sm.ticket===i?'on':'')+'" data-a="ticket" data-v="'+i+'">'+x[0]+'</button>'}).join('')+'</div><button class="btn sec" data-a="runticket">Run</button></div>';
+  if(sm.ran){var g=w.groups.filter(function(x){return x.agents>0});var pref={Access:'Access',Network:'Service desk',Hardware:'Devices'}[t[1]];var team=(g.filter(function(x){return x.n===pref})[0]||g[0]||{n:'(no group)'}).n;
+   var rank=+t[2].charAt(1),sl=w.slas[Math.min(rank-1,w.slas.length-1)]||w.slas[0];
+   ex+='<div class="card"><ul class="tl"><li>'+ico('check')+'<span>Ticket: <b>'+t[0]+'</b></span></li><li>'+ico('check')+'<span>Category: <b>'+t[1]+'</b>, priority <b>'+t[2]+'</b></span></li><li>'+ico(g.length?'check':'warn')+'<span>Assigned to: <b>'+team+'</b> ('+(g[0]?g[0].assign.toLowerCase():'n/a')+')</span></li><li>'+ico('clock')+'<span>First response due in <b>'+(sl?sl.resp:'n/a')+'</b>, resolve in <b>'+(sl?sl.res:'n/a')+'</b>, '+w.hours.days+' '+w.hours.start+'–'+w.hours.end+'</span></li></ul></div>';
+  }
+  return testPanel('service',ex)+nav(backBtn(3),openBtn('workflows','Continue to Workflows'));
+ }
+];
+
+/* workspace settings */
+SCREENS.wssettings=[
+ function(){
+  var w=W();
+  return '<div class="card stack"><div><label class="f" for="wn">Workspace name</label><input id="wn" type="text" data-bind="w.'+S.cur+'.name" data-rerender="1" value="'+esc(w.name)+'"></div>'+
+   '<div class="grid2"><div><label class="f">Key</label>'+pill(esc(w.key))+'<div class="muted small" style="margin-top:6px">Prefix for ticket numbers, such as '+esc(w.key)+'-1042.</div></div><div><label class="f">Who can raise requests here</label>'+sel('vis',['All employees','Selected groups only'],w.vis)+'</div></div>'+
+   '<div><label class="f" for="wd">Description</label><textarea id="wd" data-bind="w.'+S.cur+'.desc" style="min-height:70px">'+esc(w.desc)+'</textarea></div>'+
+   '<div class="muted small">Request types are set in Service management. <button class="link" data-a="open" data-m="service">Open</button></div></div>'+help('Workspace or group?','Create another workspace only when a team needs its own workflows, SLAs, approvers or reporting. Otherwise add a group inside this workspace.')+nav('','<button class="btn" data-a="step" data-v="1">Members and roles</button>');
+ },
+ function(){
+  var w=W(),P_=[['Sam Patel (you)','Workspace admin'],['Dev Rao','Workspace admin'],['Elena Conti','Workspace analyst'],['Aisha Khan','Workspace agent'],['Marco Rossi','Workspace agent']];
+  return '<div class="muted" style="margin-bottom:12px">Workspace roles are separate from organization roles. An agent can work requests; an admin can also manage the catalog, workflows and fields; an analyst can view reports.</div><div class="list"><table class="tbl"><tr><th>Person</th><th>Role in '+esc(w.name)+'</th></tr>'+P_.map(function(p){return '<tr><td><b>'+p[0]+'</b></td><td>'+sel('role',['Workspace agent','Workspace admin','Workspace analyst'],p[1])+'</td></tr>'}).join('')+'</table></div><div class="hint info" style="margin-top:16px">'+ico('lock')+'<span>Agents only see requests, workflows and coworkers in workspaces they belong to.</span></div>'+nav(backBtn(0),'');
+ }
+];
+
+/* go-live */
+SCREENS.golive=[
+ function(){
+  var w=W(),cs=checks(),n=cs.filter(function(c){return c.st==='pass'}).length;
+  var allIds=SCEN.filter(function(s){return scApplies(s,w)}).map(function(s){return s.id}).join(',');
+  var h='<div class="row wrapr" style="margin-bottom:12px"><b class="sp">'+n+' of 7 required checks passed</b>'+pill(n===7?'Ready':(7-n)+' open',n===7?'ok':'warn')+'<button class="btn sec sm" data-a="runids" data-v="'+allIds+'">Run all scenarios</button></div><div class="row" style="gap:6px;margin-bottom:16px">'+cs.map(function(c){return '<div class="bar" style="flex:1"><i style="width:'+(c.st==='pass'?100:0)+'%"></i></div>'}).join('')+'</div>';
+  h+='<div class="list">'+cs.map(function(c){
+   var icon=c.st==='pass'?'<span style="color:var(--ok-ink)">'+ico('check')+'</span>':'<span style="color:var(--amber-ink)">'+ico('warn')+'</span>';
+   var d,act;
+   if(c.st==='pass'){d='All '+c.n+' scenarios passed.';act=pill('Passed','ok')}
+   else if(c.st==='fail'){d=esc(c.fail.reason);act=fixBtn(c.fail.fix)}
+   else if(c.pilotCheck){d='Choose who goes live first.';act='<button class="btn sm" data-a="step" data-v="2">Choose</button>'}
+   else if(c.st==='stale'){d='Configuration changed since the last run.';act='<button class="btn sm" data-a="runids" data-v="'+c.ids.join(',')+'">Run again</button>'}
+   else{d=c.idle+' scenarios haven’t run yet.';act='<button class="btn sm" data-a="runids" data-v="'+c.ids.join(',')+'">Run now</button>'}
+   return '<div class="li" style="align-items:flex-start">'+icon+'<span class="t" style="width:200px">'+c.t+'</span><span class="sp muted">'+d+'</span>'+act+'</div>';
+  }).join('')+'</div>';
+  h+='<h2 class="sec-h">Recommended, not blocking</h2><div class="list">'+
+   '<div class="li"><span class="sp"><span class="t">AI coworker in supervised mode</span></span>'+(anyCw(w)?pill('Done','ok'):'<button class="btn sec sm" data-a="open" data-m="coworker">Set up</button>')+'</div>'+
+   '<div class="li"><span class="sp"><span class="t">Announce Atom to employees</span><div class="muted small">Teams message, email and portal banner, from a template</div></span>'+(w.kit?pill('Generated','ok'):'<button class="btn sec sm" data-a="kit">Generate</button>')+'</div>'+
+   '<div class="li"><span class="sp"><span class="t">Escalation test</span><div class="muted small">Confirms a failed chat reaches the service desk</div></span>'+(w.esc?pill('Passed','ok'):'<button class="btn sec sm" data-a="esc">Run</button>')+'</div></div>';
+  return h+nav('<span class="muted small">'+(n===7?'All required checks passed.':'The rollout unlocks when all required checks pass.')+'</span>','<button class="btn" data-a="rollout" '+(n===7?'':'disabled')+'>Start staged rollout</button>');
+ },
+ function(){
+  var w=W(),all=SCEN.filter(function(s){return scApplies(s,w)});
+  var cnt={pass:0,fail:0,idle:0,stale:0,run:0};all.forEach(function(s){cnt[sstate(s,w)]++});
+  var h='<div class="row wrapr" style="margin-bottom:12px"><div class="sp"><b>'+cnt.pass+' of '+all.length+' scenarios passed</b><div class="muted small">'+cnt.fail+' failed · '+(cnt.idle+cnt.stale)+' to run or out of date. Generated from your configuration, grouped by module.</div></div><button class="btn" data-a="runids" data-v="'+all.map(function(s){return s.id}).join(',')+'">Run all scenarios</button></div>';
+  ['atom','identity','knowledge','channels','service','workflows','coworker'].forEach(function(m){
+   var l=modScen(m);h+='<h2 class="sec-h" style="font-size:18px">'+mod(m).t+'</h2><div class="list">'+l.map(scenRow).join('')+'</div>';
+  });
+  return h+nav(backBtn(0),'<button class="btn" data-a="step" data-v="2">Continue to Rollout</button>');
+ },
+ function(){
+  var w=W();
+  var h='<div class="card stack"><b>Who goes live first?</b><div class="muted small">The pilot group tests with real work before everyone else. Any wave can be paused.</div>'+sel('pilot',['Choose a pilot group','IT service desk (9 people)','IT leadership (6 people)','Engineering volunteers (40 people)'],w.pilot||'Choose a pilot group')+(w.pilot?pill(ico('check')+'Chosen','ok'):'')+'</div>';
+  if(!w.rollout.started)return h+'<div class="hint" style="margin-top:16px">'+ico('warn')+'<span>Pass all seven required checks to start the rollout. <button class="link" data-a="step" data-v="0">Back to readiness</button></span></div>';
+  var Wv=[[w.pilot||'Pilot group','Wave 1'],['Engineering','Wave 2'],['All employees','Wave 3']],ws=w.rollout.waves;
+  return h+'<div class="hint ok" style="margin:16px 0">'+ico('check')+'<span><b>'+esc(w.name)+' is live in Teams.</b> The pilot group is chatting with Atom now.</span></div><div class="list">'+Wv.map(function(x,i){
+   var st=ws[i],p_=st==='live'?pill('Live','ok'):st==='paused'?pill('Paused','warn'):st==='next'?pill('Next','acc'):pill('Locked');
+   var btn=st==='live'?'<button class="btn sec sm" data-a="wave" data-v="'+i+'" data-op="pause">Pause</button>':st==='paused'?'<button class="btn sm" data-a="wave" data-v="'+i+'" data-op="resume">Resume</button>':st==='next'?'<button class="btn sm" data-a="wave" data-v="'+i+'" data-op="go">Go live</button>':'';
+   return '<div class="wave"><div class="sp"><div class="t">'+esc(x[0])+'</div><div class="muted small">'+x[1]+'</div></div>'+p_+btn+'</div>';
+  }).join('')+'</div>'+nav(backBtn(1),'<button class="btn" data-a="step" data-v="3">Open the week-one digest</button>');
+ },
+ function(){
+  var w=W(),dep=[['Engineering',62],['Sales',41],['Finance',28],['HR',19]];
+  var DIG=[['How do I set up a second monitor?','Asked 12 times, no answer'],['Adobe access request failed','No approver found for Creative Cloud'],['How do I expense a headset?','Asked 7 times, partial answer']];
+  var EXP=[['hr','HR workspace','Tickets and requests for HR, kept separate from IT.'],['dev','Device Support coworker','Device issues are your second biggest pain.'],['auto','Password reset automation','Repeated ticket type with a clear pattern.']];
+  return '<div class="hint" style="margin-bottom:16px">'+ico('bulb')+'<span>Demo data. A live customer would see real numbers here.</span></div>'+
+   '<div class="grid3"><div class="stile acc"><span class="big">71%</span><span>employees used Atom</span></div><div class="stile ok"><span class="big">38%</span><span>resolved without an agent</span></div><div class="stile acc"><span class="big">4 min</span><span>first response</span></div></div>'+
+   '<h2 class="sec-h">Daily digest</h2><div class="list">'+DIG.map(function(d,i){var f=w.after.fixed[i];return '<div class="li"><div class="sp"><div class="t">'+d[0]+'</div><div class="muted">'+d[1]+'</div></div>'+(f?pill(ico('check')+'Fixed','ok'):'<button class="btn sm" data-a="digfix" data-v="'+i+'">One-click fix</button>')+'</div>'}).join('')+'</div>'+
+   '<h2 class="sec-h">Adoption by department</h2><div class="card bars">'+dep.map(function(d){return '<div class="r"><span>'+d[0]+'</span><div class="bar"><i style="width:'+d[1]+'%"></i></div><b>'+d[1]+'%</b></div>'}).join('')+'</div>'+
+   '<h2 class="sec-h">What to expand next</h2><div class="list">'+EXP.map(function(e){return '<div class="li"><div class="sp"><div class="t">'+e[1]+'</div><div class="muted">'+e[2]+'</div></div>'+(w.after.added[e[0]]?pill(ico('check')+'Added to plan','ok'):'<button class="btn sm" data-a="exp" data-v="'+e[0]+'">Add to plan</button>')+'</div>'}).join('')+'</div>'+nav(backBtn(2),'');
+ }
+];
+
+/* ---------- actions ---------- */
+var AIPLANS=[[/hire|onboard|join/,'New hire onboarding',['Trigger: user added in Okta','Create onboarding tasks for IT and the manager','Send for approval: laptop request','Notify the manager when complete']],[/leave|vacation/,'Leave approval',['Trigger: leave request created','Send for approval to the manager','Update the calendar and notify HR']],[/.*/,'Custom workflow',['Trigger: as described','Conditions and branches from your description','Notify the requester','End with a status update']]];
+var A={
+ hub:function(){S.mod='welcome';S.step=S.plan?0:1;S.menu=false;S.drawer=false;render();up()},
+ open:function(d){S.drawer=false;openMod(d.m,+d.s||0)},
+ step:function(d){S.step=+d.v;S.err={};render();up()},
+ strip:function(d){S.strip[d.m]=!S.strip[d.m];render()},
+ theme:function(){
+  var r=document.documentElement,dark=r.getAttribute('data-theme')==='dark'||(r.getAttribute('data-theme')==='auto'&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+  r.setAttribute('data-theme',dark?'light':'dark');
+ },
+ menu:function(){S.menu=!S.menu;render()},
+ drawer:function(){S.drawer=!S.drawer;render()},
+ undo:function(){var u=UND.pop();if(!u)return;S=JSON.parse(u.json);S.drawer=true;render();toast('Undone: '+u.label)},
+ resume:function(){var r=S.resume;S=r;S.resume=null;render();toast('Progress restored')},
+ discard:function(){clearSaved();S.resume=null;render()},
+ pickws:function(d){S.cur=d.v;S.menu=false;S.err={};render();toast('Switched to the '+W().name+' workspace')},
+ createws:function(){cfg('Created the '+W().name+' workspace',function(){W().created=true},true);render();toast(W().name+' workspace created')},
+ ans:function(d){cfg('Updated goals',function(){
+  if(d.multi==='1'){var a=S.ans[d.k],i=a.indexOf(d.v);if(i>-1)a.splice(i,1);else a.push(d.v)}else{S.ans[d.k]=d.v;if(d.k==='first'){var f={IT:'it',HR:'hr',Finance:'fin',Facilities:'fac'}[d.v];if(f)S.cur=f}}
+ },true);render()},
+ confirmplan:function(){S.plan=true;S.step=0;render();up();toast('Plan confirmed. Start with Identity.')},
+ connectokta:function(){S.id.busy=true;render();later(function(){cfg('Connected Okta',function(){S.id.busy=false;S.id.okta=true});render();toast('Okta connected. 2,847 people imported.')},1100)},
+ addadmin:function(){
+  var e=S.id.email.trim();
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){S.err={admin:'That doesn’t look like an email address. Use the form name@northwind.com.'};render();return}
+  if(!/@northwind\.com$/.test(e)){S.err={admin:'Admins must be on your company domain (northwind.com). Guests can be invited separately.'};render();return}
+  cfg('Added organization admin '+e,function(){S.id.admins.push(e);S.id.email=''});render();toast('Admin invited')},
+ mapok:function(){cfg('Confirmed attribute mapping',function(){S.id.mapOk=true});render()},
+ lookup:function(d){S.id.lookup=+d.v;render()},
+ addsrc:function(d){
+  var c=KSRC.filter(function(x){return x.id===d.v})[0];
+  cfg('Added knowledge source '+c.name,function(){S.kn.src.push({id:c.id,name:c.name,type:c.type,n:c.n,aud:c.aud,hr:!!c.hr,status:'Processing',failOnce:!!c.failOnce})});render();
+  later(function(){var s=S.kn.src.filter(function(x){return x.id===c.id})[0];if(!s)return;s.status=s.failOnce?'Failed':'Learned';s.failOnce=false;render();toast(s.status==='Learned'?s.name+' learned':s.name+' failed. See what to do next.')},1600)},
+ retrysrc:function(d){var s=S.kn.src.filter(function(x){return x.id===d.v})[0];cfg('Retried '+s.name,function(){s.status='Processing'});render();later(function(){s.status='Learned';render();toast(s.name+' learned')},1200)},
+ setaud:function(d){var s=S.kn.src.filter(function(x){return x.id===d.v})[0];cfg('Restricted '+s.name+' to '+d.aud,function(){s.aud=d.aud});render();toast('Audience restricted')},
+ addver:function(){
+  var q=S.kn.vq.trim(),a=S.kn.va.trim();
+  if(!q||!a){S.err={ver:'Add both a question and its answer.'};render();return}
+  if(q.length<8){S.err={ver:'That question is very short. Write it the way an employee would ask it.'};render();return}
+  cfg('Added a verified answer',function(){S.kn.verified.push({q:q,a:a});S.kn.vq='';S.kn.va=''});render();toast('Verified answer added')},
+ delver:function(d){cfg('Removed a verified answer',function(){S.kn.verified.splice(+d.v,1)});render()},
+ fix:function(d){S.kn.edit=d.v;S.kn.body='';render();up()},
+ canceledit:function(){S.kn.edit=null;S.kn.body='';render()},
+ publishkb:function(){
+  if(S.kn.body.trim().length<30){S.err={art:'The article is too short for Atom to answer from. Add the steps an employee should follow.'};render();return}
+  cfg('Published an article: '+TPL[S.kn.edit].t,function(){S.kn.fixed[S.kn.edit]=true;S.kn.edit=null;S.kn.body=''});render();up();toast('Published. Atom can answer this now.')},
+ connectteams:function(){if(!S.ch.consentOk){S.ch.consent='needed';render()}else A.grant()},
+ grant:function(){S.ch.consentOk=true;S.ch.busy.teams=true;render();later(function(){cfg('Connected Microsoft Teams',function(){S.ch.busy.teams=false;S.ch.teams=true;S.ch.consent='none'});render();toast('Microsoft Teams connected')},1100)},
+ showinvite:function(){S.ch.consent='invite';render()},
+ backconsent:function(){S.ch.consent='needed';S.err={};render()},
+ sendinvite:function(){
+  var e=S.ch.email.trim();
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){S.err={inv:'Enter a valid email address, for example name@northwind.com.'};render();return}
+  S.ch.consent='invited';render();toast('Invite sent')},
+ approve:function(){S.ch.consentOk=true;toast('Teammate approved consent');A.grant()},
+ connectslack:function(){cfg('Connected Slack',function(){S.ch.slack=true});render();toast('Slack connected')},
+ chtest:function(){cfg('Sent a test message',function(){S.ch.sent=true});render();toast('Test message delivered')},
+ atomtone:function(d){S.atom.tone=d.v;render()},
+ chat:function(d){send(d.v)},
+ chatsend:function(){var i=$('#cin');send(i&&i.value)},
+ addgold:function(){
+  var q=S.atom.gq.trim(),e=S.atom.ge.trim();
+  if(!q||!e){S.err={gold:'Add both a question and the answer you expect.'};render();return}
+  cfg('Added a test question',function(){S.atom.golden.push({q:q,e:e,res:null});S.atom.gq='';S.atom.ge=''},true);render()},
+ rungold:function(d){var g=S.atom.golden[+d.v];var r=goldenEval(g);r.ver=S.ver;g.res=r;render();toast(r.ok?'Passed':'Failed. See why.')},
+ delgold:function(d){cfg('Removed a test question',function(){S.atom.golden.splice(+d.v,1)},true);render()},
+ runids:function(d){runIds(d.v.split(','))},
+ publishwf:function(){
+  var w=W(),m=w.wf.main;
+  if(m.approver==='Reporting manager'&&!S.id.fallback){S.err={wf:'This can’t be published yet. 37 people have no manager, so their requests would wait for an approval that never arrives. Choose a fallback approver, or pick a different approver. <button class="link" data-a="open" data-m="identity" data-s="1">Set a fallback approver</button>'};render();return}
+  var svc=svcOf(w,m.svc);if(svc&&!svc.pub){S.err={wf:'“'+svc.n+'” isn’t published, so nothing would start this workflow. Publish the service first. <button class="link" data-a="open" data-m="service" data-s="3">Publish the service</button>'};render();return}
+  cfg('Published workflow: '+m.name,function(){m.status='Published'});render();toast('Workflow published')},
+ unpubwf:function(){cfg('Unpublished the approval workflow',function(){W().wf.main.status='Draft'});render()},
+ pubp1:function(){var p=W().wf.p1;
+  if(p.status==='Published'){cfg('Unpublished the P1 workflow',function(){p.status='Draft'});render();return}
+  if(!S.ch.teams){S.err={p1:'P1 notifications are sent in Teams, which isn’t connected. <button class="link" data-a="open" data-m="channels">Connect Teams</button>'};render();return}
+  cfg('Published the P1 incident workflow',function(){p.status='Published'});render();toast('P1 workflow published')},
+ buildai:function(){var w=W(),t=w.wf.ai.trim();
+  if(t.length<15){S.err={ai:'Describe what should trigger the workflow and what should happen. A sentence or two is enough.'};render();return}
+  var p=AIPLANS.filter(function(x){return x[0].test(t.toLowerCase())})[0];
+  cfg('Drafted workflow: '+p[1],function(){w.wf.extra.push({name:p[1],steps:p[2]});w.wf.ai=''});render();toast('Draft created. Review the steps before publishing.')},
+ acceptapps:function(){cfg('Accepted suggested access policies',function(){var w=W();w.apps.forEach(function(a){a.pol=a.risk==='High'?'Manager + Security':(a.risk==='Low'&&(a.n==='Slack'||a.n==='Zoom')?'Pre-approved':'Manager')});w.appsOk=true});render();toast('Policies updated')},
+ confirmapps:function(){cfg('Confirmed access policies',function(){W().appsOk=true});render()},
+ simulate:function(){
+  var w=W(),sm=w.sm;if(sm.simRun)return;sm.simRun=true;var i=0;
+  (function tick(){sm.sim=i;if(i>=4)sm.simRun=false;render();if(i<4){i++;later(tick,600)}})();
+ },
+ selcw:function(d){W().cw.sel=d.v;render()},
+ cwrun:function(){W().cw.run=true;W().cw.tested=true;render()},
+ oktypes:function(){
+  var w=W();if(!w.types.sr&&!w.types.inc){S.err={types:'Enable at least service requests or incidents. A workspace needs something to receive.'};render();return}
+  cfg('Confirmed request types',function(){w.typesOk=true});render()},
+ okgroups:function(){
+  var w=W();var empty=w.groups.filter(function(g){return g.agents<1});
+  if(empty.length){S.err={groups:'“'+empty[0].n+'” has no agents. Requests assigned to it would go nowhere. Add agents or remove the group.'};render();return}
+  cfg('Confirmed agent groups',function(){w.groupsOk=true});render()},
+ okhs:function(){
+  var w=W();
+  if(slaIdx(w.hours.end.replace(':00',':00'))<0&&false){}
+  var bad=w.slas.filter(function(s){return slaIdx(s.res)<=slaIdx(s.resp)});
+  if(bad.length){S.err={sla:'“'+bad[0].n+'” resolves in '+bad[0].res+' but responds in '+bad[0].resp+'. Resolution must take longer than the first response.'};render();return}
+  if(w.hours.end<=w.hours.start){S.err={hours:'Closing time must be after opening time.'};render();return}
+  cfg('Confirmed hours and SLAs',function(){w.hoursOk=true;w.slasOk=true});render()},
+ slapause:function(d){cfg('Changed SLA pause statuses',function(){var s=W().slas[+d.v],i=s.pause.indexOf(d.p);if(i>-1)s.pause.splice(i,1);else s.pause.push(d.p);W().slasOk=false});render()},
+ pubsall:function(){
+  var w=W();if(!grpOk(w)){S.err={svc:'Requests would have no team to land in. Confirm an agent group with agents first. <button class="link" data-a="step" data-v="1">Confirm agent groups</button>'};render();return}
+  cfg('Published all starter services',function(){w.svc.forEach(function(s){s.pub=true})});render();toast('Services published. Atom can offer them now.')},
+ ticket:function(d){var w=W();w.sm.ticket=+d.v;w.sm.ran=false;render()},
+ runticket:function(){W().sm.ran=true;render()},
+ kit:function(){cfg('Generated the announcement kit',function(){W().kit=true},true);render();toast('Announcement kit generated')},
+ esc:function(){cfg('Ran the escalation test',function(){W().esc=true},true);render();toast('Escalation test passed')},
+ rollout:function(){var w=W();cfg('Started the staged rollout',function(){w.rollout.started=true;w.rollout.waves=['live','next','locked']},true);S.step=2;render();up();toast('Rollout started')},
+ wave:function(d){var i=+d.v,w=W().rollout.waves;cfg('Changed a rollout wave',function(){if(d.op==='go'||d.op==='resume'){w[i]='live';if(d.op==='go'&&i+1<3)w[i+1]='next'}if(d.op==='pause')w[i]='paused'},true);render()},
+ digfix:function(d){W().after.fixed[d.v]=true;render();toast('Fixed: article drafted and published')},
+ exp:function(d){W().after.added[d.v]=true;render();toast('Added to your plan')},
+ auto:function(){
+  cfg('Filled in the setup',function(){
+   var w=W();S.plan=true;S.id.okta=true;S.id.mapOk=true;S.id.fallback='Department head';S.id.admins=['Sam Patel (you)','dev.rao@northwind.com'];
+   S.kn.src=[{id:'sp-it',name:'SharePoint: IT guides',type:'SharePoint',n:214,aud:'All employees',status:'Learned'},{id:'jira',name:'Jira: projects',type:'Jira',n:41,aud:'IT workspace only',status:'Learned'}];S.kn.fixed={laptop:true,sf:true,room:true};S.kn.verified.push({q:'How do I reset my password?',a:'Use Forgot password on the Okta sign-in page.'});
+   S.ch.teams=true;S.ch.consentOk=true;S.ch.sent=true;
+   w.created=true;w.typesOk=w.groupsOk=w.hoursOk=w.slasOk=true;w.slas.forEach(function(s){if(s.type==='Incident'&&s.pause.indexOf('Waiting on vendor')<0)s.pause.push('Waiting on vendor')});
+   w.svc.forEach(function(s){s.pub=true});w.appsOk=true;w.apps.forEach(function(a){a.pol=a.risk==='High'?'Manager + Security':a.pol});
+   w.wf.main.status='Published';w.wf.main.notifyDecline=true;w.wf.main.remind=true;w.pilot='IT service desk (9 people)';
+   w.cw.roster.forEach(function(r){r.on=true});w.cw.goal.note=true;w.kit=true;w.esc=true;
+  });
+  runIds(SCEN.map(function(s){return s.id}));toast('Filled in. Running every scenario…');
+ },
+ reset:function(){clearSaved();UND=[];S=fresh();render();up();toast('Demo reset')}
+};
+
+/* ---------- events ---------- */
+document.addEventListener('click',function(e){
+ if(S.menu&&!e.target.closest('.wsm')){S.menu=false;render()}
+ var t=e.target.closest('[data-a]');if(!t)return;
+ var f=A[t.getAttribute('data-a')];if(f)f(t.dataset);
+});
+document.addEventListener('change',function(e){
+ var t=e.target,c=t.getAttribute&&t.getAttribute('data-c');
+ if(c){
+  var w=W(),v=t.type==='checkbox'?t.checked:t.value,i=t.dataset.v;
+  var C=function(l,fn,q){cfg(l,fn,q);render()};
+  switch(c){
+   case 'persona':S.persona=t.value;render();break;
+   case 'sync':C('Changed sync frequency',function(){S.id.sync=v});break;
+   case 'deprov':C('Changed leaver handling',function(){S.id.deprov=v});break;
+   case 'fallback':C('Set the fallback approver',function(){S.id.fallback=v==='Not set'?'':v});break;
+   case 'aud':C('Changed who can see a source',function(){S.kn.src.filter(function(s){return s.id===i})[0].aud=v});break;
+   case 'dm':C('Changed DM access',function(){S.ch.dm=v});break;
+   case 'mention':C('Changed @mention access',function(){S.ch.mention=v});break;
+   case 'pinned':C('Pinned the app',function(){S.ch.pinned=v});break;
+   case 'fwd':C('Changed email forwarding',function(){S.ch.fwd=v});break;
+   case 'domain':C('Changed the portal domain',function(){S.ch.domain=v});break;
+   case 'chscope':C('Changed allowed channels',function(){S.ch.scope=v});break;
+   case 'route':C('Changed request routing',function(){S.atom.route=v});break;
+   case 'primary':C('Changed the primary workspace',function(){S.atom.primary=WSL.filter(function(x){return S.w[x[0]].name===v})[0][0]});break;
+   case 'cite':C('Changed citation rule',function(){S.atom.cite=v});break;
+   case 'only':C('Changed the answer rule',function(){S.atom.only=v});break;
+   case 'clarify':C('Changed clarifying questions',function(){S.atom.clarify=v});break;
+   case 'escalate':C('Changed where unresolved questions go',function(){S.atom.escalate=WSL.filter(function(x){return S.w[x[0]].name===v})[0][0]});break;
+   case 'lang':C('Changed the language',function(){S.atom.lang=v});break;
+   case 'skill':C('Changed an Atom skill',function(){S.atom.skills[i]=v});break;
+   case 'approver':C('Changed the approver',function(){w.wf.main.approver=v;w.wf.main.status='Draft'});break;
+   case 'prov':C('Changed the provisioning method',function(){w.wf.main.prov=v;w.wf.main.status='Draft'});break;
+   case 'notifyDecline':C('Changed the decline message',function(){w.wf.main.notifyDecline=v});break;
+   case 'remind':C('Changed reminders',function(){w.wf.main.remind=v});break;
+   case 'apprisk':C('Changed an app’s risk level',function(){var a=w.apps[+i];a.risk=v;a.pol=v==='High'?'Manager + Security':(a.pol==='Pre-approved'&&v!=='Low'?'Manager':a.pol);w.appsOk=false});break;
+   case 'apppol':(function(){var a=w.apps[+i];
+     if(a.risk==='High'&&v!=='Manager + Security'){S.err['app'+i]='High-risk apps need Security approval. This policy was not applied.';render();return}
+     if(a.risk==='Medium'&&v==='Pre-approved'){S.err['app'+i]='Medium-risk apps need at least manager approval.';render();return}
+     C('Changed access policy for '+a.n,function(){a.pol=v;w.appsOk=false})})();break;
+   case 'simapp':w.sm.app=v;w.sm.sim=null;render();break;
+   case 'cwon':C((v?'Enabled ':'Disabled ')+cwRow(w,i).n,function(){cwRow(w,i).on=v});break;
+   case 'verify':case 'adminEscalate':case 'humanDestructive':case 'note':
+     if(c==='humanDestructive'&&!v&&w.cw.tools.okta_deactivate){S.err.cw='This boundary can’t be turned off while “Deactivate a user” is enabled. Turn that capability off first.';render();return}
+     C('Changed a coworker boundary',function(){w.cw.goal[c]=v});break;
+   case 'endstatus':C('Changed end-of-run status',function(){w.cw.goal.end=v});break;
+   case 'tool':(function(){
+     if(i==='okta_deactivate'&&v&&!w.cw.goal.humanDestructive){S.err.cw='“Deactivate a user” can’t be turned on while “Require human approval for destructive actions” is off. Turn that boundary on first.';render();return}
+     C('Changed a coworker tool capability',function(){w.cw.tools[i]=v})})();break;
+   case 'budget':C('Changed the coworker budget',function(){w.cw.budget=v});break;
+   case 'rtype':C('Changed request types',function(){w.types[i]=v;w.typesOk=false});break;
+   case 'gaccess':C('Changed group access',function(){w.groups[+i].access=v;w.groupsOk=false});break;
+   case 'gassign':C('Changed assignment method',function(){w.groups[+i].assign=v;w.groupsOk=false});break;
+   case 'tz':C('Changed the time zone',function(){w.hours.tz=v;w.hoursOk=false});break;
+   case 'days':C('Changed business days',function(){w.hours.days=v;w.hoursOk=false});break;
+   case 'hstart':C('Changed opening time',function(){w.hours.start=v;w.hoursOk=false});break;
+   case 'hend':C('Changed closing time',function(){w.hours.end=v;w.hoursOk=false});break;
+   case 'hol':C('Changed the holiday calendar',function(){w.hours.hol=v;w.hoursOk=false});break;
+   case 'slaresp':C('Changed an SLA response target',function(){w.slas[+i].resp=v;w.slasOk=false});break;
+   case 'slares':C('Changed an SLA resolution target',function(){w.slas[+i].res=v;w.slasOk=false});break;
+   case 'pubsvc':(function(){
+     if(v&&!grpOk(w)){S.err.svc='Requests would have no team to land in. Confirm an agent group with agents first. <button class="link" data-a="step" data-v="1">Confirm agent groups</button>';render();return}
+     C((v?'Published ':'Unpublished ')+w.svc[+i].n,function(){w.svc[+i].pub=v})})();break;
+   case 'csat':C('Changed the satisfaction survey',function(){w.csat=v});break;
+   case 'vis':C('Changed who can raise requests',function(){w.vis=v});break;
+   case 'role':toast('Role updated');break;
+   case 'pilot':C('Chose the pilot group',function(){w.pilot=v==='Choose a pilot group'?null:v},true);break;
+  }
+ }
+ if(t.getAttribute&&t.getAttribute('data-rerender'))render();
+});
+document.addEventListener('input',function(e){
+ var b=e.target.getAttribute&&e.target.getAttribute('data-bind');if(!b)return;
+ setPath(b,e.target.value);
+});
+document.addEventListener('keydown',function(e){
+ if(e.key==='Enter'&&e.target.id==='cin'){e.preventDefault();send(e.target.value)}
+ if(e.key==='Escape'&&(S.menu||S.drawer)){S.menu=false;S.drawer=false;render()}
+});
+
+function render(){
+ var y=window.scrollY;
+ $('#app').innerHTML=shell();
+ if(S.focus){S.focus=false;var i=$('#cin');if(i)i.focus();var m=$('.msgs');if(m)m.scrollTop=m.scrollHeight}
+ window.scrollTo(0,y);save();
+}
+var saved=load();if(saved&&saved.ver>0){S.resume=saved}
+render();
+})();
+</script>
+</body>
+</html>
